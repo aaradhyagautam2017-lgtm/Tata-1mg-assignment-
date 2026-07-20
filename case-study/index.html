@@ -707,22 +707,18 @@
   }
 
   /* ================= PROTOTYPE VIEW ================= */
-  .proto-view-inner { max-width: 960px; margin: 0 auto; padding: 8px 24px 64px; }
-  .cs-section-head { max-width: 640px; margin: 0 auto 40px; text-align: center; }
-  .cs-section-eyebrow {
-    font-size: 12px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase;
-    color: var(--grey-2);
-  }
-  .cs-section-title {
-    font-family: var(--font-display); font-weight: 600; font-size: 30px;
-    color: var(--ink-max); margin-top: 8px;
-  }
-  .cs-section-sub {
-    font-size: 14.5px; color: var(--grey-1); margin-top: 10px; line-height: 1.5;
-  }
+  /* app-like, full-screen: no page chrome, phone fits the first fold, no scroll.
+     Sizing is fully JS-driven (see fitPrototypePhone) so it always matches the
+     actual viewport rather than fighting a guessed CSS height. */
+  body[data-view="prototype"] .cs-header { display: none; }
+  .proto-view-inner { max-width: 960px; margin: 0 auto; padding: 20px 24px; }
   .proto-wrap {
-    display: flex; flex-direction: column; align-items: center; gap: 20px;
+    display: flex; flex-direction: column; align-items: center; gap: 16px;
   }
+  .phone-scale-wrap {
+    display: flex; justify-content: center;
+  }
+  #proto-phone-shell { transform-origin: top center; }
   .proto-controls {
     display: flex; align-items: center; gap: 10px;
   }
@@ -3824,12 +3820,6 @@
 
   <section class="cs-view" id="view-prototype" data-view="prototype" hidden>
     <div class="proto-view-inner">
-      <div class="cs-section-head">
-        <div class="cs-section-eyebrow">02</div>
-        <h2 class="cs-section-title">Prototype</h2>
-        <p class="cs-section-sub">The real flow, live and clickable — from home feed to reward pack to picks.</p>
-      </div>
-
       <div class="proto-wrap">
         <div class="proto-controls">
           <button class="proto-btn" id="restart-demo" type="button">
@@ -3839,9 +3829,11 @@
           <span class="proto-hint">Click through the flow inside the frame</span>
         </div>
 
-        <div class="phone-shell">
-          <div class="phone-frame">
-            <iframe id="proto-frame" src="../hifi/01-entry.html" title="Interactive prototype"></iframe>
+        <div class="phone-scale-wrap" id="phone-scale-wrap">
+          <div class="phone-shell" id="proto-phone-shell">
+            <div class="phone-frame">
+              <iframe id="proto-frame" src="../hifi/01-entry.html" title="Interactive prototype"></iframe>
+            </div>
           </div>
         </div>
       </div>
@@ -3864,6 +3856,31 @@
     frame.src = '../hifi/01-entry.html';
   });
 
+  // ---------- scale the phone mockup to fit the first fold, no scrolling ----------
+  function fitPrototypePhone() {
+    var wrap = document.getElementById('phone-scale-wrap');
+    var shell = document.getElementById('proto-phone-shell');
+    if (!wrap || !shell) return;
+
+    shell.style.transform = 'none';
+    wrap.style.width = '';
+    wrap.style.height = '';
+
+    var naturalWidth = shell.offsetWidth;
+    var naturalHeight = shell.offsetHeight;
+    if (!naturalWidth || !naturalHeight) return;
+
+    var topOffset = wrap.getBoundingClientRect().top;
+    var reservedBottom = 96; // floating toggle + breathing room
+    var availableHeight = window.innerHeight - topOffset - reservedBottom;
+    var availableWidth = document.documentElement.clientWidth - 48;
+
+    var scale = Math.min(1, availableHeight / naturalHeight, availableWidth / naturalWidth);
+    if (scale < 1) shell.style.transform = 'scale(' + scale + ')';
+    wrap.style.width = (naturalWidth * scale) + 'px';
+    wrap.style.height = (naturalHeight * scale) + 'px';
+  }
+
   // ---------- top-level view switch (Research <-> Prototype), never shared scroll ----------
   (function () {
     var toggle = document.querySelector('.floating-toggle');
@@ -3880,12 +3897,14 @@
 
     function setView(target) {
       views.forEach(function (v) { v.hidden = v.dataset.view !== target; });
+      document.body.dataset.view = target;
       options.forEach(function (opt) {
         var active = opt.dataset.target === target;
         opt.classList.toggle('is-active', active);
         if (active) moveHighlight(opt);
       });
       window.scrollTo(0, 0);
+      if (target === 'prototype') fitPrototypePhone();
     }
 
     options.forEach(function (opt) {
@@ -3896,10 +3915,12 @@
     window.addEventListener('load', function () {
       var active = options.find(function (o) { return o.classList.contains('is-active'); });
       if (active) moveHighlight(active);
+      if (document.body.dataset.view === 'prototype') fitPrototypePhone();
     });
     window.addEventListener('resize', function () {
       var active = toggle.querySelector('.ft-option.is-active');
       if (active) moveHighlight(active);
+      if (document.body.dataset.view === 'prototype') fitPrototypePhone();
     });
   })();
 
