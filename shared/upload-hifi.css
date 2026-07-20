@@ -48,6 +48,8 @@
   background: linear-gradient(140deg, #EADCFB, #D8BFF2);
   box-shadow: var(--shadow-md);
 }
+.upl2 .ph--filled .photo-fill { position: absolute; inset: 0; border-radius: 30px; overflow: hidden; }
+.upl2 .ph--filled .photo-fill img { width: 100%; height: 100%; object-fit: cover; display: block; }
 .upl2 .replace {
   position: absolute; right: -6px; bottom: -6px;
   width: 38px; height: 38px; border-radius: 50%;
@@ -80,6 +82,8 @@
   width: 66px; height: 66px; border-radius: 18px; position: relative;
   background: linear-gradient(140deg, #EADCFB, #D8BFF2); box-shadow: var(--shadow-sm);
 }
+.upl2 .rcard .photo-fill { position: absolute; inset: 0; border-radius: 18px; overflow: hidden; }
+.upl2 .rcard .photo-fill img { width: 100%; height: 100%; object-fit: cover; display: block; }
 .upl2 .rcard .check {
   position: absolute; right: -5px; top: -5px;
   width: 22px; height: 22px; border-radius: 50%;

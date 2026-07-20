@@ -22,7 +22,8 @@
   .plp2 .rail { width: 92px; flex: none; overflow-y: auto; scrollbar-width: none; padding: 10px 0 90px; }
   .plp2 .rail::-webkit-scrollbar { display: none; }
   .plp2 .rcat { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 10px 6px; position: relative; }
-  .plp2 .rcat .tile { width: 56px; height: 56px; border-radius: 16px; background: var(--page-alt); }
+  .plp2 .rcat .tile { width: 56px; height: 56px; border-radius: 16px; background: var(--page-alt); overflow: hidden; }
+  .plp2 .rcat .tile img { width: 100%; height: 100%; object-fit: cover; display: block; }
   .plp2 .rcat .rlabel { font-size: 10px; font-weight: 600; color: var(--grey-2); text-align: center; line-height: 1.25; }
 
   .plp2 .rcat--pet .tile {
@@ -131,7 +132,7 @@
         <div class="rlabel">For Meesha</div>
       </div>
       <div class="rcat rcat--pet">
-        <div class="tile"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="8" cy="8" r="2"/><circle cx="16" cy="8" r="2"/><circle cx="5.5" cy="13" r="1.8"/><circle cx="18.5" cy="13" r="1.8"/><path d="M12 12c-3 0-5.5 2.2-5.5 4.8 0 1.7 1.4 2.7 3 2.4 1-.2 1.6-.7 2.5-.7s1.5.5 2.5.7c1.6.3 3-.7 3-2.4C17.5 14.2 15 12 12 12z"/></svg></div>
+        <div class="tile"><img src="assets/mike labra.jpg" alt="Mike, a Labrador"></div>
         <div class="rlabel">For Mike</div>
       </div>
       <div class="rcat"><div class="tile"></div><div class="rlabel">Top Deals</div></div>
