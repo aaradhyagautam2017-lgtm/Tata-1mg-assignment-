@@ -1487,11 +1487,41 @@
     margin: 0;
   }
 
+  /* ---------- Final Screens gallery ---------- */
+  .final-screens-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+    gap: 32px 20px;
+    max-width: 1100px;
+    margin-top: 8px;
+  }
+  .final-screen-card {
+    display: flex; flex-direction: column; align-items: center; gap: 10px;
+  }
+  .final-screen-frame-wrap {
+    width: 186px; height: 390px; position: relative;
+    overflow: hidden; border-radius: 24px;
+    box-shadow: 0 14px 32px rgba(20,10,40,.14);
+  }
+  .final-screen-frame-wrap .phone-shell {
+    position: absolute; top: 0; left: 0;
+    transform: scale(0.45); transform-origin: top left;
+  }
+  .final-screen-frame-wrap .phone-frame iframe { pointer-events: none; }
+  .final-screen-label {
+    font-size: 12px; font-weight: 700; color: var(--ink); text-align: center; line-height: 1.35;
+  }
+  .final-screen-label .fs-num { color: var(--purple-deep); }
+
   /* ---------- Wireframe Presentation Overlay CSS ---------- */
   .wireframe-container {
     position: relative;
     display: inline-block;
   }
+  /* these embeds are reference previews, not the live demo -- freeze them so
+     hovering + scrolling can't scroll the iframe's own content out from
+     under the fixed-position red annotation overlay */
+  .wireframe-container .phone-frame iframe { pointer-events: none; }
   .wireframe-overlay {
     position: absolute;
     top: 11px;
@@ -1562,6 +1592,7 @@
             <button class="structure-item structure-item--sub" type="button" data-phase="screen05">Rewards Unlocked</button>
             <button class="structure-item structure-item--sub" type="button" data-phase="screen06">Personalised Pet Care</button>
             <button class="structure-item structure-item--sub" type="button" data-phase="screen07">Reward Entry from Cart</button>
+            <button class="structure-item" type="button" data-phase="finalscreens">09 / Final Screens</button>
           </nav>
           <p class="structure-note">More phases are added here as research is shared.</p>
         </div>
@@ -3809,6 +3840,94 @@
                   </ul>
                 </div>
 
+              </div>
+
+            </div>
+          </div>
+
+        </div>
+
+        <div class="research-panel" data-phase="finalscreens">
+          <div class="rc-eyebrow">09 / Final Screens</div>
+          <h2 class="rc-title">The Complete Flow</h2>
+
+          <div class="overview-section">
+            <p class="overview-paragraph">
+              All ten high-fidelity screens, end to end — from the Home feed entry point through to the cart's reward nudge.
+            </p>
+          </div>
+
+          <div class="overview-section">
+            <div class="final-screens-grid">
+
+              <div class="final-screen-card">
+                <div class="final-screen-frame-wrap">
+                  <div class="phone-shell"><div class="phone-frame"><iframe src="../hifi/01-entry.html" title="01 Entry"></iframe></div></div>
+                </div>
+                <div class="final-screen-label"><span class="fs-num">01</span> · Entry — Home Feed</div>
+              </div>
+
+              <div class="final-screen-card">
+                <div class="final-screen-frame-wrap">
+                  <div class="phone-shell"><div class="phone-frame"><iframe src="../hifi/02-landing.html" title="02 Campaign Landing"></iframe></div></div>
+                </div>
+                <div class="final-screen-label"><span class="fs-num">02</span> · Campaign Landing</div>
+              </div>
+
+              <div class="final-screen-card">
+                <div class="final-screen-frame-wrap">
+                  <div class="phone-shell"><div class="phone-frame"><iframe src="../hifi/03a-upload-empty.html" title="03a Upload Empty"></iframe></div></div>
+                </div>
+                <div class="final-screen-label"><span class="fs-num">03a</span> · Upload &amp; Name — Empty</div>
+              </div>
+
+              <div class="final-screen-card">
+                <div class="final-screen-frame-wrap">
+                  <div class="phone-shell"><div class="phone-frame"><iframe src="../hifi/03a-i-photo-source.html" title="03a-i Photo Source"></iframe></div></div>
+                </div>
+                <div class="final-screen-label"><span class="fs-num">03a-i</span> · Photo Source</div>
+              </div>
+
+              <div class="final-screen-card">
+                <div class="final-screen-frame-wrap">
+                  <div class="phone-shell"><div class="phone-frame"><iframe src="../hifi/03b-upload-filled.html" title="03b Upload Filled"></iframe></div></div>
+                </div>
+                <div class="final-screen-label"><span class="fs-num">03b</span> · Upload &amp; Name — Filled</div>
+              </div>
+
+              <div class="final-screen-card">
+                <div class="final-screen-frame-wrap">
+                  <div class="phone-shell"><div class="phone-frame"><iframe src="../hifi/03c-upload-second-pet.html" title="03c Add Another Pet"></iframe></div></div>
+                </div>
+                <div class="final-screen-label"><span class="fs-num">03c</span> · Add Another Pet</div>
+              </div>
+
+              <div class="final-screen-card">
+                <div class="final-screen-frame-wrap">
+                  <div class="phone-shell"><div class="phone-frame"><iframe src="../hifi/04-meet.html" title="04 A Moment of Delight"></iframe></div></div>
+                </div>
+                <div class="final-screen-label"><span class="fs-num">04</span> · A Moment of Delight</div>
+              </div>
+
+              <div class="final-screen-card">
+                <div class="final-screen-frame-wrap">
+                  <div class="phone-shell"><div class="phone-frame"><iframe src="../hifi/05-reveal.html" title="05 Rewards Unlocked"></iframe></div></div>
+                </div>
+                <div class="final-screen-label"><span class="fs-num">05</span> · Rewards Unlocked</div>
+              </div>
+
+              <div class="final-screen-card">
+                <div class="final-screen-frame-wrap">
+                  <div class="phone-shell"><div class="phone-frame"><iframe src="../hifi/06-picks.html" title="06 Personalised Pet Care"></iframe></div></div>
+                </div>
+                <div class="final-screen-label"><span class="fs-num">06</span> · Personalised Pet Care</div>
+              </div>
+
+              <div class="final-screen-card">
+                <div class="final-screen-frame-wrap">
+                  <div class="phone-shell"><div class="phone-frame"><iframe src="../hifi/07-cart-unclaimed.html" title="07 Reward Entry from Cart"></iframe></div></div>
+                </div>
+                <div class="final-screen-label"><span class="fs-num">07</span> · Reward Entry from Cart</div>
               </div>
 
             </div>
