@@ -1,0 +1,54 @@
+/* ============================================================
+   device.css — 390×844 frame, status bar, home indicator
+   Standalone: screen centers on a neutral desk.
+   In the harness iframe (390 wide): margins collapse to zero.
+   ============================================================ */
+
+body {
+  background: #f3f3f3;
+  display: grid;
+  place-items: center;
+  min-height: 100vh;
+}
+
+.device {
+  width: 390px;
+  height: 844px;
+  overflow: hidden;
+  box-shadow: 0 2px 24px rgba(0,0,0,0.08);
+}
+
+/* status bar — drawn in grey, part of every screen */
+.statusbar {
+  height: 44px;
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px 0 28px;
+}
+.statusbar .time { font-size: 14px; font-weight: 700; letter-spacing: 0.2px; }
+.statusbar .cluster { display: flex; gap: 5px; align-items: center; }
+.statusbar .cluster i {
+  display: block;
+  background: #9c9c9c;
+  border-radius: 2px;
+}
+.statusbar .sig  { width: 15px; height: 10px; }
+.statusbar .wifi { width: 14px; height: 10px; }
+.statusbar .batt { width: 22px; height: 11px; border-radius: 3px; }
+
+/* home indicator */
+.home-indicator {
+  flex: none;
+  height: 24px;
+  display: grid;
+  place-items: center;
+}
+.home-indicator::after {
+  content: "";
+  width: 130px;
+  height: 5px;
+  border-radius: 3px;
+  background: #c9c9c9;
+}

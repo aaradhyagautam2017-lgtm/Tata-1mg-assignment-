@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Review harness · Meet your pet, unlock rewards</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: "DM Sans", -apple-system, "Segoe UI", Roboto, sans-serif;
+    background: #232323;
+    color: #eee;
+    min-height: 100vh;
+  }
+  header {
+    padding: 28px 36px 18px;
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  h1 { font-size: 18px; font-weight: 700; }
+  h1 span { color: #999; font-weight: 400; }
+  .phase-toggle { display: flex; gap: 8px; }
+  .phase-toggle button {
+    font-family: inherit;
+    font-size: 13px; font-weight: 500;
+    padding: 8px 18px;
+    border-radius: 999px;
+    border: 1px solid #444;
+    background: none;
+    color: #bbb;
+    cursor: pointer;
+  }
+  .phase-toggle button.is-active { background: #eee; color: #232323; border-color: #eee; font-weight: 700; }
+  .phase-toggle button:disabled { opacity: 0.35; cursor: not-allowed; }
+
+  .rail {
+    display: flex;
+    gap: 28px;
+    padding: 10px 36px 48px;
+    overflow-x: auto;
+  }
+  .frame { flex: none; }
+  .frame .label {
+    font-size: 12.5px;
+    color: #bbb;
+    margin-bottom: 10px;
+    max-width: 273px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .frame .label b { color: #eee; }
+  .shot {
+    width: 273px;   /* 390 × 0.7 */
+    height: 591px;  /* 844 × 0.7 */
+    overflow: hidden;
+    border-radius: 14px;
+  }
+  .shot iframe {
+    width: 390px;
+    height: 844px;
+    border: none;
+    transform: scale(0.7);
+    transform-origin: top left;
+    pointer-events: auto;
+  }
+  footer {
+    padding: 0 36px 32px;
+    font-size: 12px;
+    color: #888;
+    line-height: 1.6;
+    max-width: 720px;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Meet your pet, unlock rewards <span>· Zepto · review harness</span></h1>
+  <div class="phase-toggle">
+    <button data-phase="lofi">Lo-fi</button>
+    <button class="is-active" data-phase="hifi">Hi-fi</button>
+  </div>
+</header>
+
+<div class="rail" id="rail"></div>
+
+<footer>
+  Lo-fi grammar: 2px dashed stroke = new or empty element. Darker page fill = the immersive campaign shell.
+  Screens are live iframes at 390×844, scaled 0.7 — open any file in /lofi/ directly for full size.
+</footer>
+
+<script>
+  const SCREENS = [
+    ["01-entry.html",             "01", "Entry — home feed"],
+    ["02-landing.html",           "02", "Campaign landing"],
+    ["03a-upload-empty.html",     "03a", "Upload & name — empty"],
+    ["03a-i-photo-source.html",   "03a-i", "Photo source — bottom sheet"],
+    ["03b-upload-filled.html",    "03b", "Upload & name — filled"],
+    ["03c-upload-second-pet.html","03c", "Second pet (state of 03a)"],
+    ["04-meet.html",              "04", "Meet your pets — the beat"],
+    ["05-reveal.html",            "05", "Reveal + wallet"],
+    ["06-picks.html",             "06", "Pet care picks"],
+    ["07-cart-unclaimed.html",    "07", "Cart — reward unclaimed"],
+  ];
+
+  const rail = document.getElementById("rail");
+
+  function render(phase) {
+    rail.innerHTML = "";
+    for (const [file, num, name] of SCREENS) {
+      const el = document.createElement("div");
+      el.className = "frame";
+      el.innerHTML =
+        '<div class="label"><b>' + num + '</b> · ' + name + '</div>' +
+        '<div class="shot"><iframe src="' + phase + '/' + file + '" loading="lazy" title="' + num + '"></iframe></div>';
+      rail.appendChild(el);
+    }
+  }
+
+  document.querySelectorAll(".phase-toggle button").forEach(btn => {
+    btn.addEventListener("click", () => {
+      if (btn.disabled) return;
+      document.querySelectorAll(".phase-toggle button").forEach(b => b.classList.remove("is-active"));
+      btn.classList.add("is-active");
+      render(btn.dataset.phase);
+    });
+  });
+
+  render("hifi");
+</script>
+
+</body>
+</html>

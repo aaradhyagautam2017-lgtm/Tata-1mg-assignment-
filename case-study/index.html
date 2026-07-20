@@ -1,0 +1,3967 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Meet Your Pet, Unlock Rewards — Case Study</title>
+<link rel="stylesheet" href="../shared/tokens-hifi.css">
+<style>
+  html, body {
+    background: #FBFAF8;
+    height: 100%;
+  }
+  body { padding-bottom: 96px; }
+
+  /* ---------- header (shared chrome across both views) ---------- */
+  .cs-header {
+    padding: 48px 24px 36px;
+    text-align: center;
+    max-width: 720px;
+    margin: 0 auto;
+  }
+  .cs-eyebrow {
+    font-size: 12px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase;
+    color: var(--purple-deep);
+  }
+  .cs-title {
+    font-family: var(--font-display); font-weight: 600; font-size: clamp(28px, 4.5vw, 42px);
+    line-height: 1.1; color: var(--ink-max); margin-top: 12px;
+  }
+  .cs-sub {
+    font-size: 15px; line-height: 1.55; color: var(--grey-1); margin-top: 14px;
+  }
+
+  /* ---------- views: mutually exclusive, never share a scroll ---------- */
+  .cs-view[hidden] { display: none; }
+
+  /* ---------- floating section toggle ---------- */
+  .floating-toggle {
+    position: fixed; left: 50%; bottom: 22px; transform: translateX(-50%);
+    z-index: 100;
+    display: flex;
+    background: var(--card);
+    border: 1px solid var(--hairline);
+    border-radius: 999px;
+    padding: 5px;
+    box-shadow: 0 16px 36px rgba(20,10,40,.16), 0 3px 10px rgba(20,10,40,.08);
+  }
+  .ft-highlight {
+    position: absolute; top: 5px; bottom: 5px; left: 5px;
+    border-radius: 999px;
+    background: var(--purple);
+    transition: transform .3s cubic-bezier(.4,0,.2,1), width .3s cubic-bezier(.4,0,.2,1);
+    z-index: 0;
+  }
+  .ft-option {
+    position: relative; z-index: 1;
+    font-family: var(--font-ui); font-size: 13.5px; font-weight: 700;
+    padding: 10px 22px; border-radius: 999px; border: none; background: none;
+    color: var(--grey-1); cursor: pointer;
+    transition: color .25s ease;
+  }
+  .ft-option.is-active { color: #fff; }
+
+  /* ================= RESEARCH VIEW ================= */
+  .research-layout {
+    max-width: 1180px; margin: 0 auto; padding: 8px 24px 64px;
+    display: grid; grid-template-columns: 220px 1fr; gap: 40px;
+    align-items: start;
+  }
+  .research-sidebar {
+    position: sticky; top: 40px;
+    display: flex; flex-direction: column; gap: 32px;
+  }
+  .sidebar-label {
+    font-family: var(--font-ui); font-size: 10.5px; font-weight: 800; letter-spacing: .12em;
+    text-transform: uppercase; color: var(--grey-3); margin-bottom: 12px;
+  }
+  .structure-nav { display: flex; flex-direction: column; gap: 2px; }
+  .structure-item {
+    display: flex; align-items: center; gap: 10px;
+    font-family: var(--font-ui); font-size: 13px; font-weight: 700; text-align: left;
+    color: var(--grey-3); background: none; border: none; cursor: pointer;
+    padding: 8px 0 8px 12px; border-left: 2px solid var(--hairline);
+  }
+  .structure-item.is-active {
+    color: var(--purple-deep); border-left-color: var(--purple);
+  }
+  .structure-item[disabled] {
+    cursor: default; color: var(--grey-3); opacity: .45;
+  }
+  .structure-group-label {
+    font-family: var(--font-ui); font-size: 13px; font-weight: 700;
+    color: var(--grey-3); padding: 8px 0 8px 12px; margin-top: 2px;
+    border-left: 2px solid var(--hairline);
+  }
+  .structure-item--sub {
+    font-size: 12px; font-weight: 600; padding-left: 24px;
+  }
+  .structure-note {
+    font-size: 11.5px; color: var(--grey-3); line-height: 1.5; margin-top: 14px; padding-left: 12px;
+  }
+  .sidebar-meta { display: flex; flex-direction: column; gap: 18px; }
+  .sidebar-meta-row .sidebar-label { margin-bottom: 4px; }
+  .sidebar-value { font-size: 13px; font-weight: 700; color: var(--ink); }
+
+  .research-content { min-width: 0; }
+  .research-panel {
+    margin-bottom: 120px;
+    padding-bottom: 80px;
+    border-bottom: 1px solid var(--hairline);
+  }
+  .research-panel:last-child {
+    margin-bottom: 0;
+    padding-bottom: 0;
+    border-bottom: none;
+  }
+  .research-panel[hidden] { display: none; }
+  .rc-eyebrow {
+    font-family: var(--font-ui); font-size: 11.5px; font-weight: 800; letter-spacing: .1em;
+    text-transform: uppercase; color: var(--grey-2);
+  }
+  .rc-title {
+    font-family: var(--font-display); font-weight: 600; font-size: clamp(30px, 4vw, 40px);
+    color: var(--ink-max); margin-top: 10px;
+  }
+  .rc-body {
+    font-size: 15px; line-height: 1.65; color: var(--grey-1); margin-top: 22px; max-width: 620px;
+  }
+  .rc-pending {
+    margin-top: 26px; padding: 18px 20px; max-width: 620px;
+    border: 1.5px dashed var(--hairline); border-radius: var(--r-panel);
+    font-size: 13px; color: var(--grey-2); line-height: 1.6; font-style: italic;
+  }
+
+  /* ---------- Overview specific elements ---------- */
+  .overview-section {
+    margin-top: 36px;
+  }
+  .overview-section:first-of-type {
+    margin-top: 28px;
+  }
+  .overview-section-title {
+    font-family: var(--font-ui);
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: var(--grey-3);
+    margin-bottom: 12px;
+  }
+  .info-card {
+    background: var(--card);
+    border: 1px solid var(--hairline);
+    border-radius: var(--r-tile);
+    padding: 24px;
+    max-width: 680px;
+    box-shadow: var(--shadow-sm);
+  }
+  .info-card-label {
+    font-family: var(--font-ui);
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    color: var(--purple-deep);
+    margin-bottom: 8px;
+  }
+  .info-card-text {
+    font-size: 14.5px;
+    line-height: 1.6;
+    color: var(--grey-1);
+  }
+  .approach-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    max-width: 720px;
+  }
+  @media (max-width: 680px) {
+    .approach-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+  .principle-card {
+    background: var(--card);
+    border: 1px solid var(--hairline);
+    border-radius: var(--r-tile);
+    padding: 20px;
+    box-shadow: var(--shadow-sm);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+  .principle-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+  }
+  .principle-title {
+    font-family: var(--font-ui);
+    font-size: 14.5px;
+    font-weight: 700;
+    color: var(--ink-max);
+    margin-bottom: 8px;
+  }
+  .principle-desc {
+    font-size: 13px;
+    line-height: 1.5;
+    color: var(--grey-1);
+  }
+  .overview-paragraph {
+    font-size: 15px;
+    line-height: 1.65;
+    color: var(--grey-1);
+    max-width: 680px;
+  }
+  .overview-outcome {
+    margin-bottom: 120px;
+  }
+
+  /* ---------- Opportunity specific elements ---------- */
+  .comparison-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    max-width: 720px;
+  }
+  @media (max-width: 600px) {
+    .comparison-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+  .comparison-card {
+    background: var(--card);
+    border: 1px solid var(--hairline);
+    border-radius: var(--r-tile);
+    padding: 24px;
+    box-shadow: var(--shadow-sm);
+  }
+  .comparison-card-title {
+    font-family: var(--font-ui);
+    font-size: 12px;
+    font-weight: 700;
+    margin-bottom: 16px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  .current-experience .comparison-card-title {
+    color: var(--grey-2);
+    border-bottom: 2px solid var(--hairline);
+    padding-bottom: 8px;
+  }
+  .opportunity-experience .comparison-card-title {
+    color: var(--purple-deep);
+    border-bottom: 2px solid var(--purple-tint);
+    padding-bottom: 8px;
+  }
+  .comparison-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .comparison-list li {
+    font-size: 13.5px;
+    line-height: 1.5;
+    color: var(--grey-1);
+    position: relative;
+    padding-left: 18px;
+  }
+  .comparison-list li::before {
+    content: "•";
+    position: absolute;
+    left: 0;
+    color: var(--grey-3);
+    font-size: 16px;
+    line-height: 1;
+  }
+  .opportunity-experience .comparison-list li::before {
+    color: var(--purple);
+  }
+  .challenge-card {
+    background: var(--purple-tint);
+    border-left: 4px solid var(--purple);
+    border-top: 1px solid var(--hairline);
+    border-right: 1px solid var(--hairline);
+    border-bottom: 1px solid var(--hairline);
+    border-radius: var(--r-tile);
+    padding: 28px;
+    max-width: 680px;
+    box-shadow: var(--shadow-sm);
+  }
+  .challenge-label {
+    font-family: var(--font-ui);
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: var(--purple-deep);
+    margin-bottom: 12px;
+  }
+  .challenge-text {
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: 18px;
+    line-height: 1.5;
+    color: var(--ink-max);
+    font-style: italic;
+  }
+  .goals-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    max-width: 720px;
+  }
+  @media (max-width: 600px) {
+    .goals-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+  .goal-card {
+    background: var(--card);
+    border: 1px solid var(--hairline);
+    border-radius: var(--r-tile);
+    padding: 24px;
+    box-shadow: var(--shadow-sm);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+  .goal-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+  }
+  .goal-title {
+    font-family: var(--font-ui);
+    font-size: 14.5px;
+    font-weight: 700;
+    color: var(--ink-max);
+    margin-bottom: 8px;
+  }
+  .goal-desc {
+    font-size: 13px;
+    line-height: 1.5;
+    color: var(--grey-1);
+  }
+
+  /* ---------- Analysis specific elements ---------- */
+  .journey-map-scroll {
+    overflow-x: auto;
+    padding-bottom: 12px;
+    margin-top: 16px;
+    scrollbar-width: thin;
+  }
+  .journey-map {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    min-width: 680px;
+  }
+  .journey-step {
+    flex: 1;
+    background: var(--card);
+    border: 1px solid var(--hairline);
+    border-radius: var(--r-tile);
+    padding: 16px;
+    text-align: center;
+    box-shadow: var(--shadow-sm);
+  }
+  .journey-img-placeholder {
+    height: 120px;
+    background: var(--page-alt);
+    border: 1px dashed var(--hairline);
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: var(--grey-3);
+    font-size: 11px;
+    gap: 8px;
+    padding: 12px;
+  }
+  .journey-img-placeholder svg {
+    width: 24px;
+    height: 24px;
+    stroke-width: 1.5;
+  }
+  .journey-step-info {
+    margin-top: 12px;
+  }
+  .journey-step-num {
+    font-size: 10px;
+    font-weight: 800;
+    text-transform: uppercase;
+    color: var(--purple);
+    letter-spacing: 0.05em;
+  }
+  .journey-step-name {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--ink-max);
+    margin-top: 4px;
+  }
+  .journey-arrow {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--grey-3);
+  }
+  .journey-arrow svg {
+    width: 18px;
+    height: 18px;
+  }
+  .campaign-audit-stack {
+    margin-top: 16px;
+    max-width: 900px;
+    display: flex;
+    flex-direction: column;
+    gap: 28px;
+  }
+  .campaign-audit-card {
+    background: var(--card);
+    border: 1px solid var(--hairline);
+    border-radius: var(--r-panel);
+    padding: 28px;
+    box-shadow: var(--shadow-sm);
+    display: flex;
+    flex-direction: column;
+  }
+  .audit-card-columns {
+    display: grid;
+    grid-template-columns: 27% 1fr;
+    gap: 32px;
+  }
+  @media (max-width: 768px) {
+    .campaign-audit-card {
+      padding: 20px;
+    }
+    .audit-card-columns {
+      grid-template-columns: 1fr;
+      gap: 20px;
+    }
+  }
+  .audit-visual-col {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .audit-img-wrapper {
+    background: var(--page-alt);
+    border: 1px solid var(--hairline);
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: var(--shadow-sm);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .audit-img {
+    width: 100%;
+    height: auto;
+    object-fit: cover;
+    display: block;
+    opacity: 0.94;
+    transition: transform 0.3s ease, opacity 0.3s ease;
+  }
+  .audit-img:hover {
+    transform: scale(1.02);
+    opacity: 1;
+  }
+  .audit-img-caption {
+    font-size: 11px;
+    color: var(--grey-2);
+    text-align: center;
+    font-style: italic;
+    line-height: 1.3;
+  }
+  .supporting-visual-context {
+    background: var(--page-alt);
+    border: 1px solid var(--hairline);
+    border-radius: 8px;
+    padding: 12px 16px;
+    margin-top: 20px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  .context-title {
+    font-size: 11px;
+    font-weight: 800;
+    text-transform: uppercase;
+    color: var(--purple-deep);
+    letter-spacing: 0.05em;
+    flex-shrink: 0;
+  }
+  .context-list-horizontal {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 12px;
+    font-size: 12.5px;
+    color: var(--grey-1);
+    line-height: 1.4;
+  }
+  .context-list-horizontal li {
+    position: relative;
+    display: flex;
+    align-items: center;
+  }
+  .context-list-horizontal li:not(:last-child)::after {
+    content: "•";
+    color: var(--grey-3);
+    margin-left: 12px;
+    font-size: 10px;
+  }
+  @media (max-width: 640px) {
+    .supporting-visual-context {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 8px;
+    }
+    .context-list-horizontal {
+      flex-direction: column;
+      gap: 6px;
+    }
+    .context-list-horizontal li:not(:last-child)::after {
+      display: none;
+    }
+  }
+  .audit-content-col {
+    display: flex;
+    flex-direction: column;
+  }
+  .audit-card-title-block {
+    border-bottom: 1px solid var(--hairline);
+    padding-bottom: 14px;
+    margin-bottom: 16px;
+  }
+  .audit-campaign-tag {
+    font-size: 10px;
+    font-weight: 800;
+    text-transform: uppercase;
+    color: var(--purple-deep);
+    letter-spacing: 0.06em;
+  }
+  .audit-campaign-name {
+    font-family: var(--font-ui);
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--ink-max);
+    margin-top: 4px;
+  }
+  .audit-framework-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px 24px;
+  }
+  @media (max-width: 600px) {
+    .audit-framework-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+  .framework-cell-label {
+    font-size: 11px;
+    font-weight: 800;
+    text-transform: uppercase;
+    color: var(--grey-2);
+    letter-spacing: 0.05em;
+    margin-bottom: 6px;
+  }
+  .framework-cell-desc {
+    font-size: 13px;
+    line-height: 1.5;
+    color: var(--grey-1);
+  }
+  .cohort-justification {
+    margin-top: 20px;
+    padding: 16px;
+    background: var(--purple-tint);
+    border-left: 3px solid var(--purple);
+    border-radius: 4px 8px 8px 4px;
+  }
+  .justification-label {
+    font-size: 11px;
+    font-weight: 800;
+    text-transform: uppercase;
+    color: var(--purple-deep);
+    margin-bottom: 4px;
+    letter-spacing: 0.05em;
+  }
+  .justification-text {
+    font-size: 13px;
+    line-height: 1.5;
+    color: var(--grey-1);
+  }
+  .patterns-container {
+    background: var(--card);
+    border: 1px solid var(--hairline);
+    border-radius: var(--r-panel);
+    padding: 28px 24px;
+    max-width: 900px;
+    box-shadow: var(--shadow-sm);
+  }
+  .patterns-main-title {
+    font-family: var(--font-display);
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--ink-max);
+    border-bottom: 2px solid var(--purple-tint);
+    padding-bottom: 12px;
+    margin-bottom: 20px;
+  }
+  .patterns-grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+  }
+  @media (max-width: 640px) {
+    .patterns-grid-2 {
+      grid-template-columns: 1fr;
+      gap: 16px;
+    }
+  }
+  .pattern-col {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+  .pattern-row {
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+  }
+  .pattern-icon-wrap {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: var(--purple-tint);
+    color: var(--purple);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+  .pattern-icon-wrap svg {
+    width: 12px;
+    height: 12px;
+  }
+  .pattern-item-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--ink-max);
+  }
+  .pattern-item-desc {
+    font-size: 12.5px;
+    line-height: 1.45;
+    color: var(--grey-1);
+    margin-top: 4px;
+  }
+  .insights-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    max-width: 900px;
+  }
+  @media (max-width: 640px) {
+    .insights-grid {
+      grid-template-columns: 1fr;
+    }
+    .insight-card-wide {
+      grid-column: auto !important;
+    }
+  }
+  .insight-card {
+    background: var(--card);
+    border: 1px solid var(--hairline);
+    border-radius: var(--r-tile);
+    padding: 20px;
+    box-shadow: var(--shadow-sm);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+  .insight-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+  }
+  .insight-number {
+    font-size: 10px;
+    font-weight: 800;
+    text-transform: uppercase;
+    color: var(--purple-deep);
+    letter-spacing: 0.06em;
+    margin-bottom: 6px;
+  }
+  .insight-title {
+    font-size: 14.5px;
+    font-weight: 700;
+    color: var(--ink-max);
+    line-height: 1.35;
+  }
+  .insight-desc {
+    font-size: 12.5px;
+    line-height: 1.5;
+    color: var(--grey-1);
+    margin-top: 8px;
+  }
+  .insight-card-wide {
+    grid-column: span 2;
+  }
+
+  /* ================= PROTOTYPE VIEW ================= */
+  .proto-view-inner { max-width: 960px; margin: 0 auto; padding: 8px 24px 64px; }
+  .cs-section-head { max-width: 640px; margin: 0 auto 40px; text-align: center; }
+  .cs-section-eyebrow {
+    font-size: 12px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase;
+    color: var(--grey-2);
+  }
+  .cs-section-title {
+    font-family: var(--font-display); font-weight: 600; font-size: 30px;
+    color: var(--ink-max); margin-top: 8px;
+  }
+  .cs-section-sub {
+    font-size: 14.5px; color: var(--grey-1); margin-top: 10px; line-height: 1.5;
+  }
+  .proto-wrap {
+    display: flex; flex-direction: column; align-items: center; gap: 20px;
+  }
+  .proto-controls {
+    display: flex; align-items: center; gap: 10px;
+  }
+  .proto-btn {
+    font-family: var(--font-ui); font-size: 13px; font-weight: 700; color: var(--purple-deep);
+    background: var(--purple-tint); border: none; border-radius: 999px; padding: 10px 18px;
+    cursor: pointer; display: inline-flex; align-items: center; gap: 7px;
+  }
+  .proto-btn:active { background: var(--purple-tint-2); }
+  .proto-btn svg { width: 14px; height: 14px; }
+  .proto-hint { font-size: 12.5px; color: var(--grey-2); }
+
+  .phone-shell {
+    width: 412px; padding: 11px; border-radius: 54px;
+    background: linear-gradient(160deg, #232028, #17151b);
+    box-shadow: 0 30px 70px rgba(20,10,40,.22), 0 4px 16px rgba(20,10,40,.10);
+  }
+  .phone-frame {
+    width: 390px; height: 844px; border-radius: 44px; overflow: hidden; background: #000;
+  }
+  .phone-frame iframe {
+    width: 390px; height: 844px; border: 0; display: block; background: #fff;
+  }
+
+  /* ---------- footer ---------- */
+  .cs-footer {
+    text-align: center; padding: 32px 24px 24px; font-size: 12.5px; color: var(--grey-2);
+  }
+
+  @media (max-width: 760px) {
+    .research-layout { grid-template-columns: 1fr; gap: 32px; }
+    .research-sidebar { position: static; flex-direction: row; flex-wrap: wrap; gap: 32px; }
+  }
+
+  /* ---------- Current Flow specific elements ---------- */
+  .home-scroll-container {
+    display: grid;
+    grid-template-columns: 320px 1fr;
+    gap: 40px;
+    margin-top: 24px;
+    max-width: 900px;
+  }
+  @media (max-width: 768px) {
+    .home-scroll-container {
+      grid-template-columns: 1fr;
+      gap: 24px;
+    }
+  }
+  .scroll-artifact-wrapper {
+    background: var(--page-alt);
+    border: 1px solid var(--hairline);
+    border-radius: var(--r-panel);
+    padding: 16px;
+    height: 600px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+    box-shadow: var(--shadow-sm);
+  }
+  .scroll-artifact-header {
+    font-size: 11px;
+    font-weight: 800;
+    text-transform: uppercase;
+    color: var(--grey-2);
+    margin-bottom: 12px;
+    letter-spacing: 0.05em;
+    width: 100%;
+    text-align: center;
+    border-bottom: 1px solid var(--hairline);
+    padding-bottom: 8px;
+  }
+  .scroll-artifact-viewport {
+    width: 100%;
+    height: 100%;
+    overflow-y: auto;
+    border-radius: 8px;
+    border: 1px solid var(--hairline);
+    scrollbar-width: thin;
+    background: #fff;
+  }
+  .scroll-artifact-viewport img {
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+  .scroll-annotations {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    justify-content: center;
+  }
+  .annotation-card {
+    background: var(--card);
+    border: 1px solid var(--hairline);
+    border-radius: var(--r-tile);
+    padding: 16px;
+    box-shadow: var(--shadow-sm);
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+  }
+  .annotation-badge {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: var(--purple-tint);
+    color: var(--purple);
+    font-size: 11px;
+    font-weight: 800;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .annotation-info {
+    flex: 1;
+  }
+  .annotation-title {
+    font-size: 13.5px;
+    font-weight: 700;
+    color: var(--ink-max);
+  }
+  .annotation-text {
+    font-size: 12.5px;
+    line-height: 1.45;
+    color: var(--grey-1);
+    margin-top: 4px;
+  }
+
+  /* IA Cards Layout (Restored Pixel-for-Pixel matching Screenshot) */
+  .ia-diagram-restored {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    width: 100%;
+    max-width: 480px;
+    margin: 24px auto;
+  }
+  .ia-section {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    width: 100%;
+  }
+  .ia-section-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: #333333;
+    text-align: left;
+    margin-bottom: 2px;
+    font-family: var(--font-ui);
+  }
+  .ia-node {
+    border-radius: 8px;
+    padding: 10px 14px;
+    text-align: left;
+    border: 1px solid;
+    width: 100%;
+    box-sizing: border-box;
+    font-family: var(--font-ui);
+  }
+  .ia-node-title {
+    font-size: 12.5px;
+    font-weight: 700;
+  }
+  .ia-node-sub {
+    font-size: 10.5px;
+    margin-top: 3px;
+  }
+  
+  /* Color theme: Grey */
+  .ia-node.grey {
+    background-color: #f4f1eb;
+    border-color: #dddcd6;
+    color: #4a453a;
+  }
+  .ia-node.grey .ia-node-sub {
+    color: #706a5e;
+  }
+  
+  /* Color theme: Purple */
+  .ia-node.purple {
+    background-color: #f0effb;
+    border-color: #dcd9f5;
+    color: #5b4f9b;
+  }
+  .ia-node.purple .ia-node-sub {
+    color: #766bb7;
+  }
+  
+  /* Color theme: Green */
+  .ia-node.green {
+    background-color: #eaf6ee;
+    border-color: #d1ead9;
+    color: #2e6c40;
+  }
+  .ia-node.green .ia-node-sub {
+    color: #438e58;
+  }
+  
+  /* Color theme: Blue */
+  .ia-node.blue {
+    background-color: #eaf4fb;
+    border-color: #d0e4f5;
+    color: #2e5f8a;
+  }
+  .ia-node.blue .ia-node-sub {
+    color: #4a7aa3;
+  }
+  
+  /* Highlight Red Dashed Outline */
+  .ia-highlight-outline {
+    border: 2px dashed red;
+    border-radius: 8px;
+    padding: 3px;
+    margin: -5px;
+    display: block;
+    width: calc(100% + 10px);
+    box-sizing: border-box;
+  }
+  
+  /* Callout box bottom */
+  .ia-callout-box {
+    background-color: #f8ebe2;
+    border: 1px solid #e8cab7;
+    color: #a25b34;
+    border-radius: 8px;
+    padding: 12px 16px;
+    text-align: left;
+    margin-top: 12px;
+    box-sizing: border-box;
+    width: 100%;
+    font-family: var(--font-ui);
+  }
+  .ia-callout-title {
+    font-size: 12.5px;
+    font-weight: 700;
+  }
+  .ia-callout-sub {
+    font-size: 10.5px;
+    color: #b3734e;
+    margin-top: 2px;
+  }
+  .ia-arrow-down {
+    display: flex;
+    justify-content: center;
+    color: #cccccc;
+    height: 16px;
+    align-items: center;
+    margin: 2px 0;
+  }
+  .ia-arrow-down svg {
+    width: 14px;
+    height: 14px;
+  }
+
+  /* Split layout for IA & Flow (Editorial HIG Style) */
+  .diagram-split-layout {
+    display: grid;
+    grid-template-columns: 1fr 280px;
+    gap: 40px;
+    align-items: start;
+    margin-top: 24px;
+    max-width: 900px;
+  }
+  @media (max-width: 840px) {
+    .diagram-split-layout {
+      grid-template-columns: 1fr;
+      gap: 24px;
+    }
+  }
+  .diagram-insight-card {
+    background: var(--purple-tint);
+    border: 1px solid var(--purple);
+    border-radius: 12px;
+    padding: 20px;
+    position: sticky;
+    top: 100px;
+    box-shadow: var(--shadow-sm);
+  }
+  .diagram-insight-label {
+    font-size: 10px;
+    font-weight: 800;
+    text-transform: uppercase;
+    color: var(--purple-deep);
+    letter-spacing: 0.08em;
+    margin-bottom: 8px;
+  }
+  .diagram-insight-text {
+    font-size: 13px;
+    line-height: 1.5;
+    color: var(--purple-deep);
+    font-weight: 600;
+  }
+
+  /* Branching Flow Chart Grid (Apple / Stripe style) */
+  .branch-flow-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0 32px;
+    max-width: 600px;
+    margin: 24px auto;
+  }
+  .flow-row-full {
+    grid-column: span 2;
+    display: flex;
+    justify-content: center;
+  }
+  .flow-col-left {
+    display: flex;
+    justify-content: flex-end;
+  }
+  .flow-col-right {
+    display: flex;
+    justify-content: flex-start;
+  }
+  .flow-card-new {
+    background: var(--card);
+    border: 1.5px solid var(--hairline);
+    border-radius: 8px;
+    padding: 12px 16px;
+    box-shadow: var(--shadow-xs);
+    width: 210px;
+    text-align: center;
+    position: relative;
+    border-left: 4px solid var(--grey-2);
+    transition: transform 0.2s ease, border-color 0.2s ease;
+  }
+  .flow-card-new:hover {
+    transform: translateY(-1px);
+    border-color: var(--grey-3);
+  }
+  .flow-card-new.primary-path {
+    border-left-color: #4CAF50;
+  }
+  .flow-card-new.alternate-path {
+    border-left-color: #FF9800;
+  }
+  .flow-card-new.search-path {
+    border-left-color: #2196F3;
+  }
+  .flow-card-new.campaign-path {
+    border-left-color: var(--purple);
+    background: var(--purple-tint);
+    border-color: var(--purple);
+  }
+  .flow-card-new-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--ink-max);
+  }
+  .flow-card-new-desc {
+    font-size: 10.5px;
+    font-weight: 400;
+    color: var(--grey-2);
+    margin-top: 3px;
+  }
+  .flow-svg-row {
+    width: 100%;
+    height: 32px;
+    grid-column: span 2;
+    display: flex;
+    justify-content: center;
+  }
+  .flow-svg-line {
+    width: 100%;
+    max-width: 600px;
+    height: 32px;
+  }
+  
+  /* Horizontal connect for search and banners */
+  .flow-horizontal-connect {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    width: 100%;
+  }
+  .flow-horiz-line {
+    width: 32px;
+    height: 1px;
+    border-top: 1.5px dashed var(--grey-3);
+  }
+  .flow-card-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  /* ---------- User Personas Phase CSS ---------- */
+  .personas-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    margin-top: 24px;
+    max-width: 900px;
+  }
+  @media (max-width: 768px) {
+    .personas-grid {
+      grid-template-columns: 1fr;
+      gap: 16px;
+    }
+  }
+  .persona-card {
+    background: var(--card);
+    border: 1px solid var(--hairline);
+    border-radius: var(--r-panel);
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    box-shadow: var(--shadow-sm);
+    transition: transform 0.2s ease, border-color 0.2s ease;
+  }
+  .persona-card:hover {
+    transform: translateY(-1px);
+    border-color: var(--grey-3);
+  }
+  .persona-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    border-bottom: 1px solid var(--hairline);
+    padding-bottom: 16px;
+    margin-bottom: 16px;
+  }
+  .persona-num {
+    font-size: 24px;
+    font-weight: 800;
+    color: var(--purple);
+    font-family: var(--font-display);
+    line-height: 1;
+  }
+  .persona-meta {
+    flex: 1;
+  }
+  .persona-name {
+    font-size: 16px;
+    font-weight: 750;
+    color: var(--ink-max);
+    margin: 0;
+  }
+  .persona-sub {
+    font-size: 11.5px;
+    color: var(--grey-2);
+    margin-top: 2px;
+  }
+  .persona-body {
+    flex: 1;
+  }
+  .persona-behavior {
+    font-size: 13px;
+    line-height: 1.5;
+    color: var(--grey-1);
+    margin: 0;
+  }
+  .persona-footer {
+    margin-top: 24px;
+    padding-top: 16px;
+    border-top: 1px solid var(--hairline);
+  }
+  .implication-label {
+    font-size: 10px;
+    font-weight: 800;
+    text-transform: uppercase;
+    color: var(--purple-deep);
+    letter-spacing: 0.08em;
+    margin-bottom: 6px;
+  }
+  .implication-text {
+    font-size: 12.5px;
+    line-height: 1.45;
+    color: var(--ink-max);
+    margin: 0;
+  }
+  
+  /* Anti-Persona styles */
+  .persona-header.font-anti {
+    border-bottom-color: rgba(0, 0, 0, 0.05);
+  }
+  .persona-num.text-anti {
+    color: var(--grey-2);
+  }
+  .persona-name.text-anti {
+    color: var(--grey-1);
+  }
+  .persona-behavior.text-anti {
+    color: var(--grey-2);
+  }
+  .persona-footer.border-anti {
+    border-top-color: rgba(0, 0, 0, 0.05);
+  }
+  .implication-label.text-anti {
+    color: var(--grey-2);
+  }
+  .implication-text.text-anti {
+    color: var(--grey-1);
+  }
+
+  /* ---------- Visual Direction Phase CSS ---------- */
+  .color-palette-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 16px;
+    margin-top: 16px;
+    max-width: 900px;
+  }
+  .color-swatch-card {
+    background: var(--card);
+    border: 1px solid var(--hairline);
+    border-radius: var(--r-tile);
+    padding: 16px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    box-shadow: var(--shadow-sm);
+  }
+  .color-block {
+    width: 48px;
+    height: 48px;
+    border-radius: 8px;
+    border: 1px solid var(--hairline);
+    flex-shrink: 0;
+  }
+  .swatch-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .swatch-name {
+    font-size: 13.5px;
+    font-weight: 750;
+    color: var(--ink-max);
+  }
+  .swatch-hex {
+    font-size: 11px;
+    font-family: var(--font-mono);
+    color: var(--grey-2);
+  }
+  .swatch-use {
+    font-size: 10.5px;
+    color: var(--grey-1);
+    margin-top: 2px;
+  }
+
+  .copy-comparison-table {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    margin-top: 24px;
+    max-width: 900px;
+  }
+  @media (max-width: 768px) {
+    .copy-comparison-table {
+      grid-template-columns: 1fr;
+      gap: 16px;
+    }
+  }
+  .copy-col {
+    background: var(--card);
+    border: 1px solid var(--hairline);
+    border-radius: var(--r-panel);
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+  .copy-col.transactional {
+    border-color: rgba(239, 83, 80, 0.15);
+    background: rgba(239, 83, 80, 0.02);
+  }
+  .copy-col.emotional {
+    border-color: rgba(136, 80, 252, 0.15);
+    background: rgba(136, 80, 252, 0.02);
+  }
+  .copy-col-header {
+    font-size: 10px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+  .copy-col.transactional .copy-col-header {
+    color: #c62828;
+  }
+  .copy-col.emotional .copy-col-header {
+    color: var(--purple-deep);
+  }
+  .copy-item-bubble {
+    background: var(--card);
+    border: 1px solid var(--hairline);
+    border-radius: 12px;
+    padding: 12px 16px;
+    font-size: 13px;
+    line-height: 1.45;
+    position: relative;
+  }
+  .copy-col.transactional .copy-item-bubble {
+    color: var(--grey-2);
+    text-decoration: line-through;
+    opacity: 0.8;
+  }
+  .copy-col.emotional .copy-item-bubble {
+    color: var(--ink-max);
+    font-weight: 600;
+    border-color: rgba(136, 80, 252, 0.15);
+    box-shadow: var(--shadow-sm);
+  }
+  
+  .visual-principle-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    margin-top: 24px;
+    max-width: 900px;
+  }
+  @media (max-width: 768px) {
+    .visual-principle-grid {
+      grid-template-columns: 1fr;
+      gap: 16px;
+    }
+  }
+  .vis-principle-card {
+    background: var(--card);
+    border: 1px solid var(--hairline);
+    border-radius: var(--r-panel);
+    padding: 24px;
+    box-shadow: var(--shadow-sm);
+  }
+  .vis-principle-title {
+    font-size: 14px;
+    font-weight: 750;
+    color: var(--ink-max);
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .vis-principle-num {
+    font-size: 11px;
+    font-weight: 800;
+    color: var(--purple);
+    background: var(--purple-tint);
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .vis-principle-desc {
+    font-size: 13px;
+    line-height: 1.5;
+    color: var(--grey-1);
+  }
+
+  /* ---------- Final User Flow CSS ---------- */
+  .final-flow-chart {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    max-width: 500px;
+    margin: 32px auto;
+  }
+  .final-flow-node {
+    background: var(--card);
+    border: 1px solid var(--hairline);
+    border-radius: 20px;
+    padding: 10px 24px;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--ink-max);
+    text-align: center;
+    box-shadow: var(--shadow-sm);
+    min-width: 220px;
+    transition: transform 0.2s ease, border-color 0.2s ease;
+  }
+  .final-flow-node:hover {
+    transform: translateY(-1px);
+    border-color: var(--purple);
+  }
+  .final-flow-node.accent {
+    border-color: var(--purple);
+    background: var(--purple-tint);
+    color: var(--purple-deep);
+  }
+  .final-flow-node.start-end {
+    background: var(--ink-max);
+    color: #fff;
+    border: none;
+  }
+  .final-flow-arrow {
+    display: flex;
+    justify-content: center;
+    color: var(--grey-3);
+    height: 20px;
+    align-items: center;
+  }
+  .final-flow-arrow svg {
+    width: 14px;
+    height: 14px;
+  }
+  
+  .step-explanation-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin-top: 32px;
+    max-width: 900px;
+  }
+  @media (max-width: 768px) {
+    .step-explanation-grid {
+      grid-template-columns: 1fr;
+      gap: 16px;
+    }
+  }
+  .step-card {
+    background: var(--card);
+    border: 1px solid var(--hairline);
+    border-radius: var(--r-panel);
+    padding: 20px;
+    box-shadow: var(--shadow-sm);
+  }
+  .step-num-label {
+    font-size: 10px;
+    font-weight: 800;
+    color: var(--purple);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 4px;
+  }
+  .step-screen-name {
+    font-size: 14px;
+    font-weight: 750;
+    color: var(--ink-max);
+    margin-bottom: 8px;
+  }
+  .step-desc {
+    font-size: 12.5px;
+    line-height: 1.45;
+    color: var(--grey-1);
+    margin: 0;
+  }
+  .result-callout {
+    background: #eaf6ee;
+    border: 1px solid #d1ead9;
+    color: #2e6c40;
+    border-radius: var(--r-panel);
+    padding: 20px;
+    margin-top: 24px;
+    max-width: 900px;
+  }
+  .result-label {
+    font-size: 10px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 6px;
+  }
+  .result-text {
+    font-size: 13px;
+    line-height: 1.5;
+    margin: 0;
+  }
+
+  /* ---------- Wireframe Presentation Overlay CSS ---------- */
+  .wireframe-container {
+    position: relative;
+    display: inline-block;
+  }
+  .wireframe-overlay {
+    position: absolute;
+    top: 11px;
+    left: 11px;
+    width: 390px;
+    height: 844px;
+    pointer-events: none;
+    z-index: 10;
+  }
+  .overlay-highlight {
+    position: absolute;
+    border: 2px dashed #EF5350;
+    border-radius: 8px;
+    background: rgba(239, 83, 80, 0.02);
+    box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0); /* clipping placeholder if needed */
+  }
+  .overlay-badge {
+    position: absolute;
+    top: -10px;
+    left: -10px;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: #EF5350;
+    color: #fff;
+    font-size: 11.5px;
+    font-weight: 800;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+  }
+</style>
+</head>
+<body>
+
+<header class="cs-header">
+  <div class="cs-eyebrow">TATA 1mg · Product Designer 1 take-home</div>
+  <h1 class="cs-title">Meet Your Pet, Unlock Rewards</h1>
+  <p class="cs-sub">
+    An experience for Zepto where uploading a photo of your pet unlocks a household
+    reward pack — free delivery and pet-care coupons for everyone in the home.
+  </p>
+</header>
+
+<main>
+
+  <section class="cs-view" id="view-overview" data-view="overview" hidden>
+    <div class="research-layout">
+
+      <aside class="research-sidebar">
+        <div>
+          <div class="sidebar-label">Structure</div>
+          <nav class="structure-nav" id="structure-nav">
+            <button class="structure-item is-active" type="button" data-phase="overview">01 / Overview</button>
+            <button class="structure-item" type="button" data-phase="opportunity">02 / Opportunity</button>
+            <button class="structure-item" type="button" data-phase="analysis">03 / UX Audit</button>
+            <button class="structure-item" type="button" data-phase="flow">04 / Current Flow</button>
+            <button class="structure-item" type="button" data-phase="personas">05 / User Personas</button>
+            <button class="structure-item" type="button" data-phase="visual">06 / Visual Direction</button>
+            <button class="structure-item" type="button" data-phase="finalflow">07 / Final Flow</button>
+            <div class="structure-group-label">08 / Final Design</div>
+            <button class="structure-item structure-item--sub" type="button" data-phase="screen01">Entry (Home Feed)</button>
+            <button class="structure-item structure-item--sub" type="button" data-phase="screen02">Campaign Landing</button>
+            <button class="structure-item structure-item--sub" type="button" data-phase="screen03">Upload &amp; Name</button>
+            <button class="structure-item structure-item--sub" type="button" data-phase="screen03c">Add Another Pet</button>
+            <button class="structure-item structure-item--sub" type="button" data-phase="screen04">A Moment of Delight</button>
+            <button class="structure-item structure-item--sub" type="button" data-phase="screen05">Rewards Unlocked</button>
+            <button class="structure-item structure-item--sub" type="button" data-phase="screen06">Personalised Pet Care</button>
+            <button class="structure-item structure-item--sub" type="button" data-phase="screen07">Reward Entry from Cart</button>
+          </nav>
+          <p class="structure-note">More phases are added here as research is shared.</p>
+        </div>
+
+        <div class="sidebar-meta">
+          <div class="sidebar-meta-row">
+            <div class="sidebar-label">Project</div>
+            <div class="sidebar-value">Zepto · Pet Rewards</div>
+          </div>
+          <div class="sidebar-meta-row">
+            <div class="sidebar-label">Role</div>
+            <div class="sidebar-value">Product Designer 1</div>
+          </div>
+        </div>
+      </aside>
+
+      <div class="research-content" id="research-content">
+        <div class="research-panel" data-phase="overview">
+          <div class="rc-eyebrow">01 / Overview</div>
+          <h2 class="rc-title">Overview</h2>
+          
+          <div class="overview-section">
+            <p class="overview-paragraph">
+              Zepto's Pet Care category already offers a wide range of products, but it lacks a memorable campaign that encourages users to discover the category and return to it. This project explores how a lightweight campaign can transform a routine shopping journey into an engaging experience that feels rewarding without adding unnecessary friction.
+            </p>
+          </div>
+
+          <div class="overview-section">
+            <h3 class="overview-section-title">The Assignment</h3>
+            <div class="info-card">
+              <div class="info-card-label">Assignment</div>
+              <p class="info-card-text">Design an end-to-end campaign experience for Zepto where users upload a photo of their pet to unlock exclusive Pet Care rewards.</p>
+            </div>
+          </div>
+
+          <div class="overview-section">
+            <h3 class="overview-section-title">The Opportunity</h3>
+            <div class="info-card">
+              <div class="info-card-label">Opportunity</div>
+              <p class="info-card-text">Existing Zepto campaigns successfully drive engagement through strong visual identities and playful interactions. The Pet Care category presents an opportunity to introduce a similarly engaging campaign while building a more emotional connection with pet owners.</p>
+            </div>
+          </div>
+
+          <div class="overview-section">
+            <h3 class="overview-section-title">My Approach</h3>
+            <div class="approach-grid">
+              <div class="principle-card">
+                <div class="principle-title">Emotion First</div>
+                <p class="principle-desc">Celebrate the relationship between people and their pets before introducing discounts.</p>
+              </div>
+              <div class="principle-card">
+                <div class="principle-title">Low Friction</div>
+                <p class="principle-desc">Keep participation simple—one photo upload unlocks the entire experience.</p>
+              </div>
+              <div class="principle-card">
+                <div class="principle-title">Native to Zepto</div>
+                <p class="principle-desc">Reuse Zepto's campaign language, visual style and interaction patterns so the experience feels like a natural extension of the existing app.</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="overview-section overview-outcome">
+            <h3 class="overview-section-title">Outcome</h3>
+            <p class="overview-paragraph">
+              The final concept, <strong>Paw Parade</strong>, transforms a transactional reward flow into a campaign centered around curiosity and emotional connection. Instead of asking users to upload a photo for coupons, the experience invites them to unlock a surprise prepared for their furry friend while remaining consistent with Zepto's existing campaign ecosystem.
+            </p>
+          </div>
+
+        </div>
+
+        <div class="research-panel" data-phase="opportunity">
+          <div class="rc-eyebrow">02 / Opportunity</div>
+          <h2 class="rc-title">Opportunity</h2>
+
+          <div class="overview-section">
+            <p class="overview-paragraph">
+              Zepto has successfully used seasonal and event-driven campaigns to drive engagement across categories such as Match Day, Play & Win, and Bling Mode On. These campaigns combine strong visual identities, playful interactions, and clear rewards to encourage participation beyond routine shopping.
+            </p>
+            <p class="overview-paragraph" style="margin-top: 16px;">
+              In comparison, the Pet Care category remains largely transactional. While it offers a broad catalog of products, it lacks an experience that creates anticipation, emotional engagement, or a compelling reason for users to actively discover and revisit the category.
+            </p>
+            <p class="overview-paragraph" style="margin-top: 16px;">
+              This presented an opportunity to introduce a campaign that strengthens the relationship between pet owners and the category while naturally encouraging product exploration.
+            </p>
+          </div>
+
+          <div class="overview-section">
+            <h3 class="overview-section-title">Existing Experience vs. Opportunity</h3>
+            <div class="comparison-grid">
+              <div class="comparison-card current-experience">
+                <div class="comparison-card-title">Current Experience</div>
+                <ul class="comparison-list">
+                  <li>Browse the Pet Care category</li>
+                  <li>Add products to cart</li>
+                  <li>Complete checkout</li>
+                  <li>Functional but transactional</li>
+                  <li>No campaign identity</li>
+                  <li>No memorable interaction</li>
+                  <li>Limited motivation to revisit</li>
+                </ul>
+              </div>
+              <div class="comparison-card opportunity-experience">
+                <div class="comparison-card-title">Opportunity</div>
+                <ul class="comparison-list">
+                  <li>Introduce a lightweight campaign</li>
+                  <li>Build an emotional connection with pet owners</li>
+                  <li>Create anticipation before rewards</li>
+                  <li>Increase category discovery</li>
+                  <li>Encourage repeat engagement</li>
+                  <li>Stay native to Zepto's campaign language</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <div class="overview-section">
+            <h3 class="overview-section-title">Key Design Challenge</h3>
+            <div class="challenge-card">
+              <div class="challenge-label">Design Challenge</div>
+              <p class="challenge-text">
+                How might we create a campaign that feels emotionally rewarding for pet owners while remaining simple enough to complete in under a minute and consistent with Zepto's existing campaign ecosystem?
+              </p>
+            </div>
+          </div>
+
+          <div class="overview-section overview-outcome">
+            <h3 class="overview-section-title">Design Goals</h3>
+            <div class="goals-grid">
+              <div class="goal-card">
+                <div class="goal-title">Build Emotion</div>
+                <p class="goal-desc">Celebrate the relationship between people and their pets before introducing discounts.</p>
+              </div>
+              <div class="goal-card">
+                <div class="goal-title">Create Curiosity</div>
+                <p class="goal-desc">Replace a transactional reward flow with a reveal that users look forward to.</p>
+              </div>
+              <div class="goal-card">
+                <div class="goal-title">Minimize Friction</div>
+                <p class="goal-desc">Keep participation effortless with a single photo upload.</p>
+              </div>
+              <div class="goal-card">
+                <div class="goal-title">Feel Native</div>
+                <p class="goal-desc">Reuse Zepto's visual language, campaign patterns, and interaction principles so the experience feels like an official feature rather than a separate product.</p>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <div class="research-panel" data-phase="analysis">
+          <div class="rc-eyebrow">03 / Existing Experience Analysis</div>
+          <h2 class="rc-title">Understanding Zepto's Campaign System</h2>
+
+          <div class="overview-section">
+            <p class="overview-paragraph">
+              Before proposing a solution, I analyzed how Zepto designs and structures its existing campaign experiences. Rather than treating campaigns as promotional banners, Zepto consistently creates lightweight event ecosystems that combine visual storytelling, rewards, and playful interactions to increase engagement.
+            </p>
+            <p class="overview-paragraph" style="margin-top: 16px;">
+              This analysis focuses on identifying the reusable patterns behind those campaigns and understanding how they differ from the existing Pet Care experience.
+            </p>
+          </div>
+
+          <div class="overview-section">
+            <h3 class="overview-section-title">Campaign Analysis</h3>
+                <div class="campaign-audit-stack">
+              <!-- Campaign 1: Match Hangout -->
+              <div class="campaign-audit-card">
+                <div class="audit-card-columns">
+                  <div class="audit-visual-col">
+                    <div class="audit-img-wrapper">
+                      <img class="audit-img" src="../assets/match hangout.jpeg" alt="Match Hangout Screenshot">
+                    </div>
+                    <div class="audit-img-caption">Match Hangout Home Feed Banner</div>
+                  </div>
+                  
+                  <div class="audit-content-col">
+                    <div class="audit-card-title-block">
+                      <div class="audit-campaign-tag">Occasion Curation</div>
+                      <h4 class="audit-campaign-name">Match Hangout</h4>
+                    </div>
+                    
+                    <div class="audit-framework-grid">
+                      <div class="framework-cell">
+                        <div class="framework-cell-label">Campaign Identity</div>
+                        <p class="framework-cell-desc">Themed landing page curating products around football viewing occasions. Uses an immersive sports atmosphere, soccer graphics, and field-green imagery to signal the viewing event.</p>
+                      </div>
+                      <div class="framework-cell">
+                        <div class="framework-cell-label">Motivation</div>
+                        <p class="framework-cell-desc">Occasion-based shopping. Motivates users to prepare for watching a match with friends by consolidating food and entertainment needs.</p>
+                      </div>
+                      <div class="framework-cell">
+                        <div class="framework-cell-label">Reward Structure</div>
+                        <p class="framework-cell-desc">Occasion bundling. Convenience and contextual discount groupings of snacks and drinks rather than prediction games or rewards.</p>
+                      </div>
+                      <div class="framework-cell">
+                        <div class="framework-cell-label">Interaction Model</div>
+                        <p class="framework-cell-desc">Contextual merchandising and curated collections. Groups related items (football, chips, soft drinks, gaming accessories, speakers, projectors) under a single occasion umbrella to drive lightweight discovery and increase basket size.</p>
+                      </div>
+                      <div class="framework-cell">
+                        <div class="framework-cell-label">Emotional Tone</div>
+                        <p class="framework-cell-desc">Celebratory, social, and sports-themed. Relies on the shared excitement of a viewing event to trigger impulse group purchases.</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Supporting context moves below the columns -->
+                <div class="supporting-visual-context">
+                  <div class="context-title">Occasion Curations:</div>
+                  <ul class="context-list-horizontal">
+                    <li>Match Day Deals</li>
+                    <li>Munchies & Snacks</li>
+                    <li>Cold Beverages</li>
+                    <li>Match Day Essentials</li>
+                    <li>Gaming Accessories & Audio</li>
+                  </ul>
+                </div>
+              </div>
+              
+              <!-- Campaign 2: Bling Mode On -->
+              <div class="campaign-audit-card">
+                <div class="audit-card-columns">
+                  <div class="audit-visual-col">
+                    <div class="audit-img-wrapper">
+                      <img class="audit-img" src="../assets/bling mode on.jpeg" alt="Bling Mode On Screenshot">
+                    </div>
+                    <div class="audit-img-caption">Bling Mode On Home Feed Banner</div>
+                  </div>
+                  
+                  <div class="audit-content-col">
+                    <div class="audit-card-title-block">
+                      <div class="audit-campaign-tag">Lifestyle Curation</div>
+                      <h4 class="audit-campaign-name">Bling Mode On</h4>
+                    </div>
+                    
+                    <div class="audit-framework-grid">
+                      <div class="framework-cell">
+                        <div class="framework-cell-label">Campaign Identity</div>
+                        <p class="framework-cell-desc">Premium, editorial visual presentation. Dark gold metallic textures and aesthetic beauty layouts replace standard product catalog panels.</p>
+                      </div>
+                      <div class="framework-cell">
+                        <div class="framework-cell-label">Motivation</div>
+                        <p class="framework-cell-desc">Aesthetic routines and lifestyle choices. Appeals to users' desire for structured, high-quality self-care rituals.</p>
+                      </div>
+                      <div class="framework-cell">
+                        <div class="framework-cell-label">Reward Structure</div>
+                        <p class="framework-cell-desc">Collection-first discovery. Highlights high-quality routines rather than gamified reward triggers.</p>
+                      </div>
+                      <div class="framework-cell">
+                        <div class="framework-cell-label">Interaction Model</div>
+                        <p class="framework-cell-desc">Collection-first browsing. Groups vast listings into intuitive routine categories (Makeup Favourites, Skincare Collection, Hair Care Ritual, Scent & Style) to simplify choice.</p>
+                      </div>
+                      <div class="framework-cell">
+                        <div class="framework-cell-label">Emotional Tone</div>
+                        <p class="framework-cell-desc">Premium, indulgent, and seasonal. Focuses on lifestyle merchandising to make routine self-care shopping feel special.</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Supporting context moves below the columns -->
+                <div class="supporting-visual-context">
+                  <div class="context-title">Curated Beauty Collections:</div>
+                  <ul class="context-list-horizontal">
+                    <li>Makeup Favourites</li>
+                    <li>Skincare Collection</li>
+                    <li>Hair Care Ritual</li>
+                    <li>Bath, Body & Beyond</li>
+                    <li>Scent & Style</li>
+                  </ul>
+                </div>
+              </div>
+
+              <!-- Campaign 3: Play & Win -->
+              <div class="campaign-audit-card">
+                <div class="audit-card-columns">
+                  <div class="audit-visual-col">
+                    <div class="audit-img-wrapper">
+                      <img class="audit-img" src="../assets/play and win.jpeg" alt="Play & Win Landing Page">
+                    </div>
+                    <div class="audit-img-caption">Street Football Game Screen</div>
+                  </div>
+                  
+                  <div class="audit-content-col">
+                    <div class="audit-card-title-block">
+                      <div class="audit-campaign-tag">Gamified Engagement</div>
+                      <h4 class="audit-campaign-name">Play & Win</h4>
+                    </div>
+                    
+                    <div class="audit-framework-grid">
+                      <div class="framework-cell">
+                        <div class="framework-cell-label">Campaign Identity</div>
+                        <p class="framework-cell-desc">Standalone platform-level gamified feature. Promoted via permanent entry hooks and custom screens dedicated entirely to gaming interaction.</p>
+                      </div>
+                      <div class="framework-cell">
+                        <div class="framework-cell-label">Motivation</div>
+                        <p class="framework-cell-desc">Entertainment, prediction tasks, and monetary cashbacks. Users enter with the explicit intent to participate in games rather than purchase items.</p>
+                      </div>
+                      <div class="framework-cell">
+                        <div class="framework-cell-label">Reward Structure</div>
+                        <p class="framework-cell-desc">Progressive milestones and persistent rewards. Gamified points and unlocks accumulate over multiple sessions.</p>
+                      </div>
+                      <div class="framework-cell">
+                        <div class="framework-cell-label">Interaction Model</div>
+                        <p class="framework-cell-desc">Standalone interactive lobby, multi-step game entries, progression trees, and active interactive play loops.</p>
+                      </div>
+                      <div class="framework-cell">
+                        <div class="framework-cell-label">Emotional Tone</div>
+                        <p class="framework-cell-desc">Competitive, active, and reward-driven. Focuses on daily habits and persistent gamified retention loops.</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Supporting context moves below the columns -->
+                <div class="supporting-visual-context">
+                  <div class="context-title">Engagement Model:</div>
+                  <ul class="context-list-horizontal">
+                    <li>Dedicated game entry hook</li>
+                    <li>Progression milestones</li>
+                    <li>Persistent participation</li>
+                    <li>Unlockable rewards & coupons</li>
+                  </ul>
+                </div>
+
+                <div class="cohort-justification" style="margin-top: 16px;">
+                  <div class="justification-label">Design Decision Impact</div>
+                  <p class="justification-text">
+                    Because <strong>Play & Win</strong> is available to every Zepto customer, it justifies having its own standalone navigation entry and multiple screens. In contrast, <strong>Paw Parade</strong> serves only a subset of users (pet owners), so a lightweight campaign flow (entry banner ➔ landing overlay ➔ quick upload) is far more appropriate than a standalone product experience. This scoping directly informed our UI architecture.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="overview-section">
+            <h3 class="overview-section-title">Common Design Patterns</h3>
+            <div class="patterns-container">
+              <h4 class="patterns-main-title">Repeating Patterns Across Zepto Campaigns</h4>
+              
+              <div class="patterns-grid-2">
+                <div class="pattern-col">
+                  <div class="pattern-row">
+                    <div class="pattern-icon-wrap">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                    </div>
+                    <div class="pattern-text">
+                      <h5 class="pattern-item-title">Every campaign has a strong visual identity</h5>
+                      <p class="pattern-item-desc">Custom color schemas, headers, and backgrounds signal a unique campaign world that stands out from standard screens.</p>
+                    </div>
+                  </div>
+                  
+                  <div class="pattern-row">
+                    <div class="pattern-icon-wrap">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+                    </div>
+                    <div class="pattern-text">
+                      <h5 class="pattern-item-title">Every campaign has a clearly defined theme</h5>
+                      <p class="pattern-item-desc">The visual curation centers around one clear topic (football viewing, beauty routines, predicting match outcomes) to stay unified.</p>
+                    </div>
+                  </div>
+
+                  <div class="pattern-row">
+                    <div class="pattern-icon-wrap">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                    </div>
+                    <div class="pattern-text">
+                      <h5 class="pattern-item-title">Products are contextualized rather than listed generically</h5>
+                      <p class="pattern-item-desc">Grouping products by consumption occasion or routine steps replaces sterile category listings and makes bundles intuitive.</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="pattern-col">
+                  <div class="pattern-row">
+                    <div class="pattern-icon-wrap">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="8 12 12 16 16 12"></polyline><line x1="12" y1="8" x2="12" y2="16"></line></svg>
+                    </div>
+                    <div class="pattern-text">
+                      <h5 class="pattern-item-title">Campaigns encourage exploration instead of direct purchasing</h5>
+                      <p class="pattern-item-desc">Visual structures prioritize discovery rails, routines, or game elements to prolong sessions and promote impulsive clicks.</p>
+                    </div>
+                  </div>
+
+                  <div class="pattern-row">
+                    <div class="pattern-icon-wrap">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h6v6"></path><path d="M10 14 21 3"></path><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path></svg>
+                    </div>
+                    <div class="pattern-text">
+                      <h5 class="pattern-item-title">Each experience has a simple, immediately understandable entry point</h5>
+                      <p class="pattern-item-desc">Promotional entry cards in the main feed rely on high-allure banners that require zero reading to draw the user in.</p>
+                    </div>
+                  </div>
+
+                  <div class="pattern-row">
+                    <div class="pattern-icon-wrap">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+                    </div>
+                    <div class="pattern-text">
+                      <h5 class="pattern-item-title">Every campaign feels native to Zepto while maintaining its own personality</h5>
+                      <p class="pattern-item-desc">Core frames (app frames, bottom actions, search bars) remain unchanged, allowing the skinned panels to feel like trustable first-party content.</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="overview-section">
+            <h3 class="overview-section-title">Where Pet Care Falls Short</h3>
+            <div class="comparison-grid">
+              <div class="comparison-card current-experience">
+                <div class="comparison-card-title">Existing Pet Care</div>
+                <ul class="comparison-list">
+                  <li>Transactional shopping</li>
+                  <li>Generic browsing</li>
+                  <li>No campaign identity</li>
+                  <li>No anticipation</li>
+                  <li>No emotional storytelling</li>
+                  <li>No onboarding moment</li>
+                  <li>No reason to revisit</li>
+                </ul>
+              </div>
+              <div class="comparison-card opportunity-experience">
+                <div class="comparison-card-title">Opportunity</div>
+                <ul class="comparison-list">
+                  <li>Campaign identity</li>
+                  <li>Personalization</li>
+                  <li>Reward reveal</li>
+                  <li>Emotional connection</li>
+                  <li>Repeat engagement</li>
+                  <li>Memorable first interaction</li>
+                  <li>Category discovery</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <div class="overview-section">
+            <h3 class="overview-section-title">Key Insights</h3>
+            <div class="insights-grid">
+              <div class="insight-card">
+                <div class="insight-number">Insight 01</div>
+                <h4 class="insight-title">Occasion Curation Drives Cross-Purchasing</h4>
+                <p class="insight-desc"><em>Evidence (Match Hangout):</em> Bundling party snacks next to projector devices around football occasions makes impulsive basket-building natural. <br><strong>Influence on Paw Parade:</strong> Structured the reward landing product category rail ("For Mike" & "For Meesha") to display customized snacks, toys, and care products in one consolidated view rather than splitting them into generic categories.</p>
+              </div>
+              
+              <div class="insight-card">
+                <div class="insight-number">Insight 02</div>
+                <h4 class="insight-title">Routine Merchandising Streamlines Choice</h4>
+                <p class="insight-desc"><em>Evidence (Bling Mode On):</em> Structuring beauty catalogs into routines (Makeup, Skincare, Hair Care) makes browsing self-explanatory. <br><strong>Influence on Paw Parade:</strong> The reward coupons are styled as specific daily needs (e.g., Treat Time vs. Daily Essentials) to give users a thematic routine-based rationale for cart conversions.</p>
+              </div>
+
+              <div class="insight-card">
+                <div class="insight-number">Insight 03</div>
+                <h4 class="insight-title">Cohort Size Dictates UI Architecture</h4>
+                <p class="insight-desc"><em>Evidence (Play & Win):</em> High-traffic platform-wide games justify dedicated tabs and persistent game states. <br><strong>Influence on Paw Parade:</strong> Since pet owners represent a subset, we built a lightweight, non-intrusive entry banner and multi-photo upload sheet that launches inline over standard category grids to keep layout bloating to zero.</p>
+              </div>
+
+              <div class="insight-card">
+                <div class="insight-number">Insight 04</div>
+                <h4 class="insight-title">Thematic visual skins establish campaign modes</h4>
+                <p class="insight-desc"><em>Evidence (Match Hangout & Bling Mode):</em> Changing backgrounds to themed colors (metallic beauty, pitch green) instantly signals an event is active. <br><strong>Influence on Paw Parade:</strong> Designed a customized warm-cream atmosphere gradient skin (`#F3ECE1` -> `#FFFFFF`) for the campaign entry feed and landing screens to visually isolate the campaign mode.</p>
+              </div>
+
+              <div class="insight-card insight-card-wide">
+                <div class="insight-number">Insight 05</div>
+                <h4 class="insight-title">Curiosity-Driven Entries Drive Category Entries</h4>
+                <p class="insight-desc"><em>Evidence (All Campaigns):</em> Banners focus on lifestyle allure and mystery rewards rather than text-heavy instructional loops. <br><strong>Influence on Paw Parade:</strong> Replaced transactional "Upload photo for coupon" banner copy with a curiosity-driven entry banner ("A pawsome surprise is waiting for your pets' pack"), tapping into emotional curiosity to drive engagement.</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="overview-section overview-outcome">
+            <h3 class="overview-section-title">Synthesis</h3>
+            <p class="overview-paragraph">
+              This analysis revealed that Zepto's strongest campaigns do not rely solely on discounts. Instead, they create lightweight experiences that blend curiosity, emotion, and rewards into a cohesive journey. These observations became the foundation for designing <strong>Paw Parade</strong>—a campaign that applies the same principles to the Pet Care category while introducing a more personal and emotionally engaging interaction.
+            </p>
+          </div>
+
+        </div>
+
+        <div class="research-panel" data-phase="flow">
+          <div class="rc-eyebrow">04 / Current Flow</div>
+          <h2 class="rc-title">Understanding the Current Journey</h2>
+
+          <div class="overview-section">
+            <p class="overview-paragraph">
+              Before introducing a new campaign, it's important to understand how users currently reach the Pet Care category.
+            </p>
+            <p class="overview-paragraph" style="margin-top: 16px;">
+              Unlike seasonal campaigns, Pet Care is buried within Zepto's standard shopping hierarchy. Users must either intentionally search for pet-related products or navigate through multiple layers before discovering the category.
+            </p>
+            <p class="overview-paragraph" style="margin-top: 16px;">
+              This creates a high-friction discovery path for users who are not already planning to purchase pet products.
+            </p>
+          </div>
+
+          <!-- Part 1: Home Feed Overview -->
+          <div class="overview-section">
+            <h3 class="overview-section-title">Part 1 — Home Feed Overview</h3>
+            
+            <div class="home-scroll-container">
+              <div class="scroll-artifact-wrapper">
+                <div class="scroll-artifact-header">Home Feed Scroll Artifact</div>
+                <div class="scroll-artifact-viewport">
+                  <img src="../assets/home_scroll_overview.png" alt="Zepto Home Feed Scroll Overview">
+                </div>
+              </div>
+              
+              <div class="scroll-annotations">
+                <div class="annotation-card">
+                  <div class="annotation-badge">1</div>
+                  <div class="annotation-info">
+                    <h5 class="annotation-title">Hero Promotional Banners</h5>
+                    <p class="annotation-text">Positioned at the very top of the feed to capture immediate attention with seasonal offers.</p>
+                  </div>
+                </div>
+                
+                <div class="annotation-card">
+                  <div class="annotation-badge">2</div>
+                  <div class="annotation-info">
+                    <h5 class="annotation-title">Deals & Offers Row</h5>
+                    <p class="annotation-text">Multiple high-frequency promotional rows (e.g. deals starting at ₹9) that drive impulse buying.</p>
+                  </div>
+                </div>
+
+                <div class="annotation-card">
+                  <div class="annotation-badge">3</div>
+                  <div class="annotation-info">
+                    <h5 class="annotation-title">Curated Merchandising</h5>
+                    <p class="annotation-text">Occasion-led campaign blocks that stand out visually to draw users into seasonal categories.</p>
+                  </div>
+                </div>
+
+                <div class="annotation-card">
+                  <div class="annotation-badge">4</div>
+                  <div class="annotation-info">
+                    <h5 class="annotation-title">Household Essentials</h5>
+                    <p class="annotation-text">The parent category under which Pet Care is nested, positioned much lower in the browsing hierarchy.</p>
+                  </div>
+                </div>
+
+                <div class="annotation-card">
+                  <div class="annotation-badge">5</div>
+                  <div class="annotation-info">
+                    <h5 class="annotation-title">Deep Category Placement</h5>
+                    <p class="annotation-text">Pet Care appears near the bottom of the feed, requiring significant scroll depth and reducing organic category discovery.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="info-card" style="margin-top: 24px;">
+              <div class="info-card-label">Observation</div>
+              <p class="info-card-text">
+                The majority of the home feed is optimized around promotional merchandising and high-frequency shopping categories. By the time users reach Pet Care, they have already passed numerous promotional and merchandising surfaces, reducing the likelihood of organic category discovery.
+              </p>
+            </div>
+          </div>
+
+          <!-- Part 2: Information Architecture (Grouped Cards) -->
+          <div class="overview-section">
+            <h3 class="overview-section-title">Part 2 — Information Architecture</h3>
+            <div class="ia-diagram-restored">
+              <!-- Persistent top chrome -->
+              <div class="ia-section">
+                <div class="ia-section-title">Persistent top chrome</div>
+                <div class="ia-node grey">
+                  <div class="ia-node-title">Location + delivery time</div>
+                </div>
+                <div class="ia-node grey">
+                  <div class="ia-node-title">Storefront toggles — switch store</div>
+                  <div class="ia-node-sub">Zepto · Monsoon · SuperMall · Cafe</div>
+                </div>
+                <div class="ia-node grey">
+                  <div class="ia-node-title">Search bar</div>
+                </div>
+                <div class="ia-node grey">
+                  <div class="ia-node-title">Feed-lens strip — filters home</div>
+                  <div class="ia-node-sub">All · Pooja · Match Day · Fresh · Electronics</div>
+                </div>
+              </div>
+              
+              <div class="ia-arrow-down">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><polyline points="19 12 12 19 5 12"></polyline></svg>
+              </div>
+
+              <!-- Merchandised feed -->
+              <div class="ia-section">
+                <div class="ia-section-title">Merchandised feed</div>
+                <div class="ia-node purple">
+                  <div class="ia-node-title">Hero promo banner</div>
+                </div>
+                <div class="ia-node purple">
+                  <div class="ia-node-title">Coupons & offers</div>
+                </div>
+                <div class="ia-node purple">
+                  <div class="ia-node-title">Buy again</div>
+                </div>
+                <div class="ia-node purple">
+                  <div class="ia-node-title">Promo banner</div>
+                </div>
+                <div class="ia-node purple">
+                  <div class="ia-node-title">Deals starting at ₹9</div>
+                </div>
+                <div class="ia-node purple">
+                  <div class="ia-node-title">Fresh — daily essentials</div>
+                </div>
+                <div class="ia-node purple">
+                  <div class="ia-node-title">Blockbuster deals</div>
+                </div>
+                <div class="ia-node purple">
+                  <div class="ia-node-title">Fashion under ₹199</div>
+                </div>
+                <div class="ia-node purple">
+                  <div class="ia-node-title">Flash deals — up to 60% off</div>
+                </div>
+                <div class="ia-node purple">
+                  <div class="ia-node-title">More promo banners</div>
+                </div>
+              </div>
+
+              <div class="ia-arrow-down">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><polyline points="19 12 12 19 5 12"></polyline></svg>
+              </div>
+
+              <!-- Navigation -->
+              <div class="ia-section">
+                <div class="ia-section-title">Navigation</div>
+                
+                <!-- Category mega-tiles with red dashed border highlight outline -->
+                <div class="ia-highlight-outline">
+                  <div class="ia-node green">
+                    <div class="ia-node-title">Category mega-tiles</div>
+                    <div class="ia-node-sub">Grocery · Snacks · Fashion · Beauty · Household</div>
+                  </div>
+                </div>
+
+                <div class="ia-node green">
+                  <div class="ia-node-title">Shop by store</div>
+                  <div class="ia-node-sub">Monsoon · Gift · Co-op · Pooja ...</div>
+                </div>
+              </div>
+
+              <div class="ia-arrow-down">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><polyline points="19 12 12 19 5 12"></polyline></svg>
+              </div>
+
+              <!-- Global bottom nav -->
+              <div class="ia-section">
+                <div class="ia-section-title">Global bottom nav</div>
+                <div class="ia-node blue">
+                  <div class="ia-node-title">Bottom navigation</div>
+                  <div class="ia-node-sub">Home · Categories · Play & Win · Cafe</div>
+                </div>
+              </div>
+
+              <div class="ia-arrow-down">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><polyline points="19 12 12 19 5 12"></polyline></svg>
+              </div>
+
+              <!-- Transactional -->
+              <div class="ia-section">
+                <div class="ia-section-title">Transactional</div>
+                <div class="ia-node blue">
+                  <div class="ia-node-title">Order flow</div>
+                  <div class="ia-node-sub">Cart → Checkout → Payment → Order tracking</div>
+                </div>
+              </div>
+
+              <div class="ia-arrow-down">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><polyline points="19 12 12 19 5 12"></polyline></svg>
+              </div>
+
+              <!-- Other destinations -->
+              <div class="ia-section">
+                <div class="ia-section-title">Other destinations</div>
+                <div class="ia-node grey">
+                  <div class="ia-node-title">Standalone</div>
+                  <div class="ia-node-sub">Play & Win (rewards) · Account · Search results</div>
+                </div>
+              </div>
+
+              <!-- Callout Box -->
+              <div class="ia-callout-box">
+                <div class="ia-callout-title">Pet care lives inside household essentials</div>
+                <div class="ia-callout-sub">at the very bottom of navigation</div>
+              </div>
+            </div>
+
+            <div class="info-card" style="margin-top: 24px;">
+              <div class="info-card-label">Key Finding</div>
+              <p class="info-card-text">
+                Pet Care is nested inside a broader Household Essentials taxonomy rather than existing as a first-class destination. While this hierarchy supports organization, it also reduces visibility for users who are casually browsing.
+              </p>
+            </div>
+          </div>
+
+          <!-- Part 3: Current User Flow (Branching) -->
+          <div class="overview-section">
+            <h3 class="overview-section-title">Part 3 — Current User Flow</h3>
+            
+            <div class="diagram-split-layout">
+              <div class="branch-flow-grid">
+                <!-- Row 1: Home -->
+                <div class="flow-row-full">
+                  <div class="flow-card-new primary-path">
+                    <div class="flow-card-new-title">Open App — Home</div>
+                  </div>
+                </div>
+
+                <!-- Split connector (Home -> Scroll/Tab) -->
+                <div class="flow-svg-row">
+                  <svg class="flow-svg-line" viewBox="0 0 400 32" fill="none">
+                    <path d="M200 0 V12 H100 V32 M200 12 H300 V32" stroke="var(--grey-3)" stroke-dasharray="2,2" stroke-width="1.5" />
+                  </svg>
+                </div>
+
+                <!-- Row 2: Split -->
+                <div class="flow-col-left">
+                  <div class="flow-card-new alternate-path">
+                    <div class="flow-card-new-title">Scroll past deal feed</div>
+                    <div class="flow-card-new-desc">~12 promo rows, below fold</div>
+                  </div>
+                </div>
+                <div class="flow-col-right">
+                  <div class="flow-card-new primary-path">
+                    <div class="flow-card-new-title">Categories tab</div>
+                    <div class="flow-card-new-desc">global bottom nav</div>
+                  </div>
+                </div>
+
+                <!-- Merge connector (Scroll/Tab -> Household Tile) -->
+                <div class="flow-svg-row">
+                  <svg class="flow-svg-line" viewBox="0 0 400 32" fill="none">
+                    <path d="M100 0 V12 H200 V32 M300 0 V12 H200" stroke="var(--grey-3)" stroke-dasharray="2,2" stroke-width="1.5" />
+                  </svg>
+                </div>
+
+                <!-- Row 3: Household Essentials -->
+                <div class="flow-row-full">
+                  <div class="flow-card-new primary-path">
+                    <div class="flow-card-new-title">Household essentials tile</div>
+                  </div>
+                </div>
+
+                <!-- Connector (Household -> Pet Care Nested) -->
+                <div class="flow-svg-row">
+                  <svg class="flow-svg-line" viewBox="0 0 400 32" fill="none">
+                    <path d="M200 0 V32" stroke="var(--grey-3)" stroke-width="1.5" />
+                  </svg>
+                </div>
+
+                <!-- Row 4: Pet Care -->
+                <div class="flow-row-full">
+                  <div class="flow-card-new campaign-path">
+                    <div class="flow-card-new-title">Pet care (nested tile)</div>
+                  </div>
+                </div>
+
+                <!-- Connector (Pet Care -> PLP) -->
+                <div class="flow-svg-row">
+                  <svg class="flow-svg-line" viewBox="0 0 400 32" fill="none">
+                    <path d="M200 0 V12 H100 V32" stroke="var(--grey-3)" stroke-width="1.5" />
+                  </svg>
+                </div>
+
+                <!-- Row 5: PLP vs Search/Banner Stack -->
+                <div class="flow-col-left">
+                  <div class="flow-card-new campaign-path">
+                    <div class="flow-card-new-title">Pet care PLP (listing)</div>
+                    <div class="flow-card-new-desc">cat food · dog food · grooming</div>
+                  </div>
+                </div>
+                <div class="flow-col-right" style="position: relative;">
+                  <!-- Horiz connector line -->
+                  <div style="position: absolute; top: 50%; left: -32px; width: 32px; height: 1.5px; border-top: 1.5px dashed var(--grey-3); transform: translateY(-50%);"></div>
+                  
+                  <div class="flow-card-stack">
+                    <div class="flow-card-new search-path">
+                      <div class="flow-card-new-title">Search "dog food"</div>
+                    </div>
+                    <div class="flow-card-new search-path">
+                      <div class="flow-card-new-title">Pet store banner</div>
+                      <div class="flow-card-new-desc">occasional promo</div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Connector (PLP -> PDP / Add to Cart) -->
+                <div class="flow-svg-row">
+                  <svg class="flow-svg-line" viewBox="0 0 400 32" fill="none">
+                    <path d="M100 0 V32 M100 12 H300 V32" stroke="var(--grey-3)" stroke-width="1.5" />
+                    <!-- Label "add direct" -->
+                    <text x="76" y="24" fill="var(--grey-2)" font-size="9" font-family="var(--font-ui)" font-weight="700">add direct</text>
+                  </svg>
+                </div>
+
+                <!-- Row 6: Add to Cart vs PDP -->
+                <div class="flow-col-left">
+                  <div class="flow-card-new campaign-path">
+                    <div class="flow-card-new-title">Add to cart</div>
+                  </div>
+                </div>
+                <div class="flow-col-right">
+                  <div class="flow-card-new">
+                    <div class="flow-card-new-title">PDP (optional)</div>
+                  </div>
+                </div>
+
+                <!-- Merge connector (Add to Cart / PDP -> Checkout) -->
+                <div class="flow-svg-row">
+                  <svg class="flow-svg-line" viewBox="0 0 400 32" fill="none">
+                    <path d="M100 0 V12 H200 V32 M300 0 V12 H200" stroke="var(--grey-3)" stroke-dasharray="2,2" stroke-width="1.5" />
+                  </svg>
+                </div>
+
+                <!-- Row 7: Checkout -->
+                <div class="flow-row-full">
+                  <div class="flow-card-new primary-path">
+                    <div class="flow-card-new-title">Checkout</div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Insight Card next to it -->
+              <div class="diagram-insight-card">
+                <div class="diagram-insight-label">Observation</div>
+                <p class="diagram-insight-text">
+                  Users must intentionally navigate through multiple discovery layers before reaching Pet Care. Unlike seasonal campaigns, there is no lightweight entry point from the home feed.
+                </p>
+              </div>
+            </div>
+
+            <div class="info-card" style="margin-top: 24px;">
+              <div class="info-card-label">Observation</div>
+              <p class="info-card-text">
+                The existing flow is highly efficient for users with clear purchase intent. However, users without an immediate need for pet products receive very few contextual prompts encouraging them to explore the category.
+              </p>
+            </div>
+          </div>
+
+          <!-- Highlighted Summary Card -->
+          <div class="overview-section">
+            <div class="challenge-card">
+              <div class="challenge-label">Key Insight</div>
+              <p class="challenge-text" style="font-family: var(--font-display); font-size: 18px; line-height: 1.45; font-style: italic;">
+                "Pet Care isn't difficult to use—it is difficult to discover."
+              </p>
+              <p class="challenge-text" style="margin-top: 12px; font-size: 13.5px; line-height: 1.5; font-style: normal; color: var(--grey-1);">
+                The challenge is not simplifying checkout or product browsing. The opportunity lies in creating a lightweight campaign that introduces the category earlier in the shopping journey and gives users a compelling reason to engage before they actively begin searching for pet products.
+              </p>
+            </div>
+          </div>
+
+        </div>
+
+        <div class="research-panel" data-phase="personas">
+          <div class="rc-eyebrow">05 / User Personas</div>
+          <h2 class="rc-title">Understanding Behavioral Motivations</h2>
+
+          <div class="overview-section">
+            <p class="overview-paragraph">
+              To design a campaign that integrates seamlessly into Zepto's ecosystem, we analyzed behavioral patterns rather than demographic profiles. Our goal was to understand how experience levels and household contexts drive purchasing behavior, allowing us to align campaign mechanics with user needs.
+            </p>
+            <p class="overview-paragraph" style="margin-top: 16px;">
+              These personas directly informed key product decisions—from trust building to entry-point visibility—ensuring that the experience is highly valuable for pet owners while remaining completely non-intrusive for non-pet shoppers.
+            </p>
+          </div>
+
+          <div class="overview-section">
+            <div class="personas-grid">
+              <!-- Persona 01 -->
+              <div class="persona-card">
+                <div class="persona-header">
+                  <div class="persona-num">01</div>
+                  <div class="persona-meta">
+                    <h4 class="persona-name">Ananya</h4>
+                    <p class="persona-sub">First-time Pet Parent · Age 26 · Bangalore</p>
+                  </div>
+                </div>
+                <div class="persona-body">
+                  <p class="persona-behavior">
+                    A first-time dog owner who lacks confidence in choosing pet products. She engages in research-heavy decision-making, frequently purchasing small packs to test pet preferences. For Ananya, trust and reassurance are far more valuable than discounts.
+                  </p>
+                </div>
+                <div class="persona-footer">
+                  <div class="implication-label">Design Implication</div>
+                  <p class="implication-text">
+                    Lead with trust before rewards. Free delivery is more valuable than aggressive discounts. Breed confirmation should confidently support indie dogs rather than treating them as a fallback.
+                  </p>
+                </div>
+              </div>
+
+              <!-- Persona 02 -->
+              <div class="persona-card">
+                <div class="persona-header">
+                  <div class="persona-num">02</div>
+                  <div class="persona-meta">
+                    <h4 class="persona-name">Rohit</h4>
+                    <p class="persona-sub">Experienced Buyer · Age 34 · Mumbai</p>
+                  </div>
+                </div>
+                <div class="persona-body">
+                  <p class="persona-behavior">
+                    An experienced pet owner with two Labradors. He is a high-frequency repeat buyer who values speed and convenience above all else. Rohit has established shopping routines and does not enjoy marketing gimmicks or intrusive pop-ups.
+                  </p>
+                </div>
+                <div class="persona-footer">
+                  <div class="implication-label">Design Implication</div>
+                  <p class="implication-text">
+                    Keep the flow extremely short. Rewards should reduce friction instead of adding new interactions. Avoid repeatedly prompting users after rewards have already been claimed.
+                  </p>
+                </div>
+              </div>
+
+              <!-- Persona 03 -->
+              <div class="persona-card">
+                <div class="persona-header">
+                  <div class="persona-num">03</div>
+                  <div class="persona-meta">
+                    <h4 class="persona-name">Meher</h4>
+                    <p class="persona-sub">Multi-Pet Household · Age 29 · Delhi NCR</p>
+                  </div>
+                </div>
+                <div class="persona-body">
+                  <p class="persona-behavior">
+                    Manages a busy household with two cats and one dog. She acts as a household-level shopper, making mixed-species purchases. Meher needs an experience that can organize and cater to multiple pet profiles.
+                  </p>
+                </div>
+                <div class="persona-footer">
+                  <div class="implication-label">Design Implication</div>
+                  <p class="implication-text">
+                    Design for households instead of individual pets. The experience should naturally support multiple pets while keeping the initial onboarding lightweight.
+                  </p>
+                </div>
+              </div>
+
+              <!-- Persona 04 -->
+              <div class="persona-card">
+                <div class="persona-header font-anti">
+                  <div class="persona-num text-anti">04</div>
+                  <div class="persona-meta">
+                    <h4 class="persona-name text-anti">Kabir</h4>
+                    <p class="persona-sub">Anti-Persona · Age 28 · Pune</p>
+                  </div>
+                </div>
+                <div class="persona-body">
+                  <p class="persona-behavior text-anti">
+                    A routine grocery shopper who does not own pets. Kabir expects his grocery shopping experience to remain fast and clean. Kabir has no intention of ever purchasing pet products.
+                  </p>
+                </div>
+                <div class="persona-footer border-anti">
+                  <div class="implication-label text-anti">Design Implication</div>
+                  <p class="implication-text text-anti">
+                    The campaign should never become intrusive. Visibility should naturally decay so non-pet users are not repeatedly interrupted.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <div class="research-panel" data-phase="visual">
+          <div class="rc-eyebrow">06 / Visual Direction</div>
+          <h2 class="rc-title">Establishing the Visual Rationale</h2>
+
+          <!-- 01 — Emotional Direction -->
+          <div class="overview-section">
+            <h3 class="overview-section-title">01 — Emotional Direction</h3>
+            <p class="overview-paragraph">
+              The campaign intentionally moves away from traditional, highly transactional coupon campaigns. Instead of treating category discovery as a marketing task, the experience is designed to feel warm, playful, emotionally rewarding, and calm.
+            </p>
+            <p class="overview-paragraph" style="margin-top: 16px;">
+              By avoiding high-pressure language like "winning" or "earning", the reward feels discovered organically by the user. The goal is to make the user feel they are doing something thoughtful for their pet rather than chasing another discount.
+            </p>
+          </div>
+
+          <!-- 02 — Visual Language -->
+          <div class="overview-section">
+            <h3 class="overview-section-title">02 — Visual Language</h3>
+            <p class="overview-paragraph">
+              The visual language is designed to feel native to Zepto's existing event systems while establishing its own calmer identity. Key visual attributes include soft gradients, illustrated character assets, a warm pastel palette, generous whitespace, and rounded geometries that reduce visual noise.
+            </p>
+          </div>
+
+          <!-- 03 — Colour System -->
+          <div class="overview-section">
+            <h3 class="overview-section-title">03 — Colour System</h3>
+            <p class="overview-paragraph">
+              The approved color palette shifts away from high-energy commercial gradients to create an emotionally comforting atmosphere.
+            </p>
+            
+            <div class="color-palette-grid">
+              <!-- Swatch 1 -->
+              <div class="color-swatch-card">
+                <div class="color-block" style="background-color: #8850FC;"></div>
+                <div class="swatch-info">
+                  <span class="swatch-name">Brand Anchor</span>
+                  <span class="swatch-hex">#8850FC</span>
+                  <span class="swatch-use">Zepto Purple anchor</span>
+                </div>
+              </div>
+              
+              <!-- Swatch 2 -->
+              <div class="color-swatch-card">
+                <div class="color-block" style="background-color: #EEECFB;"></div>
+                <div class="swatch-info">
+                  <span class="swatch-name">Soft Lavender</span>
+                  <span class="swatch-hex">#EEECFB</span>
+                  <span class="swatch-use">Background canvas</span>
+                </div>
+              </div>
+
+              <!-- Swatch 3 -->
+              <div class="color-swatch-card">
+                <div class="color-block" style="background-color: #F7D6E9;"></div>
+                <div class="swatch-info">
+                  <span class="swatch-name">Warm Pink</span>
+                  <span class="swatch-hex">#F7D6E9</span>
+                  <span class="swatch-use">Secondary highlights</span>
+                </div>
+              </div>
+
+              <!-- Swatch 4 -->
+              <div class="color-swatch-card">
+                <div class="color-block" style="background-color: #FC3F93;"></div>
+                <div class="swatch-info">
+                  <span class="swatch-name">Bright Pink</span>
+                  <span class="swatch-hex">#FC3F93</span>
+                  <span class="swatch-use">Primary CTA buttons</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 04 — Copy Direction -->
+          <div class="overview-section">
+            <h3 class="overview-section-title">04 — Copy Direction</h3>
+            <p class="overview-paragraph">
+              Copywriting principles focus on the emotional connection between pet parents and their pets. Instead of leading with rewards or percentages, copy uses a warm, conversational, and reassuring tone.
+            </p>
+            
+            <div class="copy-comparison-table">
+              <div class="copy-col transactional">
+                <div class="copy-col-header">Avoid: Transactional Copy</div>
+                <div class="copy-item-bubble">"Win rewards"</div>
+                <div class="copy-item-bubble">"Unlock discounts"</div>
+                <div class="copy-item-bubble">"Get 20% off pet food now"</div>
+              </div>
+              
+              <div class="copy-col emotional">
+                <div class="copy-col-header">Use: Emotional Copy</div>
+                <div class="copy-item-bubble">"We've packed something for your furry friend."</div>
+                <div class="copy-item-bubble">"All that's missing is their photo."</div>
+                <div class="copy-item-bubble">"A surprise picked for your furry friend."</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 05 — Illustration Style -->
+          <div class="overview-section">
+            <h3 class="overview-section-title">05 — Illustration Style</h3>
+            <p class="overview-paragraph">
+              Illustrations follow a hand-crafted, playful aesthetic with soft drop-shadows and minimal detail. We intentionally avoid realistic renderings or AI-looking textures, choosing instead a clean flat-illustration style that feels warm and human.
+            </p>
+            
+            <div class="ia-wrapper" style="max-width: 480px; padding: 32px; display: flex; gap: 24px; align-items: center; justify-content: center; background: #fff; margin-top: 16px; border-radius: var(--r-panel); border: 1px solid var(--hairline); box-shadow: var(--shadow-sm);">
+              <svg viewBox="0 0 120 120" style="width: 80px; height: 80px;" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M40 70 C40 70, 35 60, 45 55 C55 50, 65 50, 75 55 C85 60, 80 70, 80 70" stroke="#8850FC" stroke-width="3" stroke-linecap="round"/>
+                <circle cx="48" cy="62" r="3.5" fill="#8850FC"/>
+                <circle cx="72" cy="62" r="3.5" fill="#8850FC"/>
+                <path d="M57 69 C57 69, 60 72, 63 69" stroke="#8850FC" stroke-width="2.5" stroke-linecap="round"/>
+                <path d="M37 53 C34 45, 25 50, 28 62 C30 70, 38 64, 38 64" fill="#F7D6E9" stroke="#8850FC" stroke-width="2.5" stroke-linecap="round"/>
+                <path d="M83 53 C86 45, 95 50, 92 62 C90 70, 82 64, 82 64" fill="#F7D6E9" stroke="#8850FC" stroke-width="2.5" stroke-linecap="round"/>
+              </svg>
+              <div style="font-family: var(--font-ui);">
+                <div style="font-size: 13.5px; font-weight: 750; color: var(--ink-max);">Flat Illustrated Characters</div>
+                <div style="font-size: 11.5px; color: var(--grey-2); margin-top: 4px; line-height: 1.4;">Soft rounded shapes, pastel accents, and hand-drawn qualities that evoke comfort.</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 06 — Experience Principles -->
+          <div class="overview-section">
+            <h3 class="overview-section-title">06 — Experience Principles</h3>
+            
+            <div class="visual-principle-grid">
+              <!-- Principle 1 -->
+              <div class="vis-principle-card">
+                <div class="vis-principle-title">
+                  <div class="vis-principle-num">1</div>
+                  <span>Emotion before Incentive</span>
+                </div>
+                <p class="vis-principle-desc">
+                  The relationship with the pet is introduced and celebrated before discussing rewards, shifting the user's mindset from commerce to care.
+                </p>
+              </div>
+
+              <!-- Principle 2 -->
+              <div class="vis-principle-card">
+                <div class="vis-principle-title">
+                  <div class="vis-principle-num">2</div>
+                  <span>Curiosity over Promotion</span>
+                </div>
+                <p class="vis-principle-desc">
+                  Rewards remain partially hidden until the user participates, using curiosity to drive engagement instead of loud promo callouts.
+                </p>
+              </div>
+
+              <!-- Principle 3 -->
+              <div class="vis-principle-card">
+                <div class="vis-principle-title">
+                  <div class="vis-principle-num">3</div>
+                  <span>Minimal Friction</span>
+                </div>
+                <p class="vis-principle-desc">
+                  Every interaction must justify itself. The flow is kept short and efficient to match Zepto's quick-delivery proposition.
+                </p>
+              </div>
+
+              <!-- Principle 4 -->
+              <div class="vis-principle-card">
+                <div class="vis-principle-title">
+                  <div class="vis-principle-num">4</div>
+                  <span>Feels Native to Zepto</span>
+                </div>
+                <p class="vis-principle-desc">
+                  Every visual element follows Zepto's campaign architecture, ensuring the campaign feels like a native extension of the app.
+                </p>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <div class="research-panel" data-phase="finalflow">
+          <div class="rc-eyebrow">07 / Final User Flow</div>
+          <h2 class="rc-title">The Complete User Journey</h2>
+
+          <!-- Hero visual: flow chart diagram -->
+          <div class="overview-section">
+            <div class="final-flow-chart">
+              <div class="final-flow-node start-end">Open App — Home Feed</div>
+              
+              <div class="final-flow-arrow">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><polyline points="19 12 12 19 5 12"></polyline></svg>
+              </div>
+              
+              <div class="final-flow-node accent">Step 01: Entry Banner</div>
+              
+              <div class="final-flow-arrow">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><polyline points="19 12 12 19 5 12"></polyline></svg>
+              </div>
+
+              <div class="final-flow-node accent">Step 02: Campaign Landing</div>
+              
+              <div class="final-flow-arrow">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><polyline points="19 12 12 19 5 12"></polyline></svg>
+              </div>
+
+              <div class="final-flow-node accent">Step 03: Upload Sheet</div>
+              
+              <div class="final-flow-arrow">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><polyline points="19 12 12 19 5 12"></polyline></svg>
+              </div>
+
+              <div class="final-flow-node accent">Step 04: Reward Reveal</div>
+              
+              <div class="final-flow-arrow">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><polyline points="19 12 12 19 5 12"></polyline></svg>
+              </div>
+
+              <div class="final-flow-node accent">Step 05: Reward Wallet</div>
+              
+              <div class="final-flow-arrow">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><polyline points="19 12 12 19 5 12"></polyline></svg>
+              </div>
+
+              <div class="final-flow-node accent">Step 06: Pet Care Feed</div>
+              
+              <div class="final-flow-arrow">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><polyline points="19 12 12 19 5 12"></polyline></svg>
+              </div>
+
+              <div class="final-flow-node start-end">Checkout (Redeemed)</div>
+            </div>
+          </div>
+
+          <!-- Explanation Grid -->
+          <div class="overview-section">
+            <div class="step-explanation-grid">
+              <!-- Step 01 -->
+              <div class="step-card">
+                <div class="step-num-label">Step 01</div>
+                <h4 class="step-screen-name">Entry Banner</h4>
+                <p class="step-desc">
+                  The campaign is introduced through a lightweight home-feed banner positioned beneath the storefront lens strip. It remains discoverable without interrupting primary shopping behavior.
+                </p>
+              </div>
+
+              <!-- Step 02 -->
+              <div class="step-card">
+                <div class="step-num-label">Step 02</div>
+                <h4 class="step-screen-name">Campaign Landing</h4>
+                <p class="step-desc">
+                  Instead of asking users to upload immediately, this screen establishes curiosity, explains the experience, and emotionally frames the reward before requesting any action.
+                </p>
+              </div>
+
+              <!-- Step 03 -->
+              <div class="step-card">
+                <div class="step-num-label">Step 03</div>
+                <h4 class="step-screen-name">Upload Sheet</h4>
+                <p class="step-desc">
+                  Image upload uses familiar camera/gallery patterns to minimize cognitive load. The interaction feels native to the operating system and requires no learning.
+                </p>
+              </div>
+
+              <!-- Step 04 -->
+              <div class="step-card">
+                <div class="step-num-label">Step 04</div>
+                <h4 class="step-screen-name">Reward Reveal</h4>
+                <p class="step-desc">
+                  The reveal creates the emotional peak of the journey. Rewards remain hidden until participation, making discovery feel earned rather than advertised.
+                </p>
+              </div>
+
+              <!-- Step 05 -->
+              <div class="step-card">
+                <div class="step-num-label">Step 05</div>
+                <h4 class="step-screen-name">Reward Wallet</h4>
+                <p class="step-desc">
+                  Unlocked benefits are collected into a persistent wallet that users can revisit throughout the shopping session. This gives rewards lasting value instead of feeling disposable.
+                </p>
+              </div>
+
+              <!-- Step 06 -->
+              <div class="step-card">
+                <div class="step-num-label">Step 06</div>
+                <h4 class="step-screen-name">Pet Care Feed</h4>
+                <p class="step-desc">
+                  Users are taken directly into a curated shopping experience where rewards can be immediately redeemed. The transition connects engagement directly to commerce.
+                </p>
+              </div>
+            </div>
+
+            <!-- Checkout Result Box -->
+            <div class="result-callout">
+              <div class="result-label">Result</div>
+              <p class="result-text">
+                The experience concludes inside Zepto's existing purchase flow. No new checkout behavior is introduced—users simply continue shopping with rewards already applied.
+              </p>
+            </div>
+          </div>
+
+        </div>
+
+        <div class="research-panel" data-phase="screen01">
+          <div class="rc-eyebrow">08 / Final Design</div>
+          <h2 class="rc-title">01. Entry Points (Home Feed)</h2>
+
+          <div class="overview-section">
+            <div class="diagram-split-layout">
+              
+              <!-- Left Column: Embedded lofi prototype with absolute SVG presentation overlay -->
+              <div class="wireframe-container">
+                <div class="phone-shell">
+                  <div class="phone-frame">
+                    <iframe src="../lofi/01-entry.html" title="01 - Home Feed Entry Wireframe"></iframe>
+                  </div>
+                </div>
+                <div class="wireframe-overlay">
+                  <!-- Highlight 1: Category mega-tile entry chip (.lenses, measured via getBoundingClientRect) -->
+                  <div class="overlay-highlight" style="top: 204px; left: 0px; width: 390px; height: 79px;">
+                    <span class="overlay-badge">01</span>
+                  </div>
+                  <!-- Highlight 2: Hero campaign banner / promotional card (.campaign-banner, measured) -->
+                  <div class="overlay-highlight" style="top: 289px; left: 20px; width: 350px; height: 246px;">
+                    <span class="overlay-badge">02</span>
+                  </div>
+                </div>
+
+                <!-- Annotation legend -->
+                <div style="margin-top: 16px; display: flex; flex-direction: column; gap: 12px; max-width: 412px;">
+                  <div style="display: flex; gap: 10px; align-items: flex-start;">
+                    <span class="overlay-badge" style="position: static; flex: none;">01</span>
+                    <p style="font-size: 12.5px; line-height: 1.45; color: var(--grey-1); margin: 0;"><strong style="color: var(--ink-max);">Category Entry</strong> — Positioned in the lens row, reaching users already browsing with pet-care intent.</p>
+                  </div>
+                  <div style="display: flex; gap: 10px; align-items: flex-start;">
+                    <span class="overlay-badge" style="position: static; flex: none;">02</span>
+                    <p style="font-size: 12.5px; line-height: 1.45; color: var(--grey-1); margin: 0;"><strong style="color: var(--ink-max);">Campaign Banner</strong> — The primary discovery surface, surfaced directly in the Home feed for maximum visibility.</p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Right Column: Design Decisions & Rationale -->
+              <div>
+                <div class="diagram-insight-card" style="position: static; margin-bottom: 24px; background: transparent; border-color: var(--hairline); box-shadow: none; padding: 0;">
+                  <div class="diagram-insight-label">SCREEN 01</div>
+                  <h3 class="rc-title" style="font-size: 24px; margin-top: 4px; margin-bottom: 12px;">Entry Points</h3>
+                  <p class="overview-paragraph" style="font-size: 13.5px; line-height: 1.55;">
+                    The campaign is intentionally introduced through two complementary entry points instead of relying on a single discovery mechanism. One reaches users already exploring the Pet Care category, while the other captures passive interest directly from the main Home feed.
+                  </p>
+                </div>
+
+                <!-- Decision 1 -->
+                <div style="margin-bottom: 24px;">
+                  <h4 style="font-family: var(--font-display); font-size: 16px; font-weight: 750; color: var(--ink-max); margin-bottom: 8px;">01 — Category Navigation Entry</h4>
+                  <p class="overview-paragraph" style="font-size: 13px; line-height: 1.5; color: var(--grey-1);">
+                    Positioned inside the storefront lenses row where users naturally browse. This entry reaches users already expressing category intent, providing a contextual path without disrupting the primary browsing flow.
+                  </p>
+                  <ul class="comparison-list" style="margin-top: 10px; font-size: 12.5px; color: var(--grey-1); gap: 6px;">
+                    <li><strong>Reaches high-intent users:</strong> Captures parents actively looking to purchase pet items.</li>
+                    <li><strong>Feels native:</strong> Adapts to Zepto's horizontal lens-filtering paradigm.</li>
+                    <li><strong>No UI bloat:</strong> Relies on existing layout slots instead of building new interfaces.</li>
+                    <li><strong>Scalability:</strong> Easily updates or swaps to follow seasonal events.</li>
+                  </ul>
+                </div>
+
+                <!-- Decision 2 -->
+                <div style="margin-bottom: 24px;">
+                  <h4 style="font-family: var(--font-display); font-size: 16px; font-weight: 750; color: var(--ink-max); margin-bottom: 8px;">02 — Campaign Banner Entry</h4>
+                  <p class="overview-paragraph" style="font-size: 13px; line-height: 1.5; color: var(--grey-1);">
+                    The hero campaign banner acts as the primary discovery surface. Rather than waiting for users to search, it is surfaced directly inside the Home feed where promotional visibility is highest.
+                  </p>
+                  <ul class="comparison-list" style="margin-top: 10px; font-size: 12.5px; color: var(--grey-1); gap: 6px;">
+                    <li><strong>Maximizes discoverability:</strong> Positioned in a high-traffic area.</li>
+                    <li><strong>Lifestyle storytelling:</strong> Evokes curiosity through character assets.</li>
+                    <li><strong>Contextual framing:</strong> Explains value upfront before requesting actions.</li>
+                    <li><strong>Zero interruption:</strong> Integrates inline with other feed blocks.</li>
+                  </ul>
+                </div>
+
+                <!-- Callout Box -->
+                <div class="challenge-card" style="background: var(--purple-tint); border-color: var(--purple); padding: 18px; margin-top: 16px;">
+                  <h5 style="font-family: var(--font-display); font-size: 14px; font-weight: 750; color: var(--purple-deep); margin-bottom: 6px;">Why two entry points?</h5>
+                  <p style="font-size: 12.5px; line-height: 1.45; color: var(--purple-deep); margin: 0;">
+                    Each entry serves a different behavioral intent. The category chip captures users already seeking pet-care products, while the campaign banner targets users who may not have planned to visit Pet Care. Together they balance discoverability with contextual relevance, increasing category participation without adding friction.
+                  </p>
+                </div>
+
+              </div>
+
+            </div>
+          </div>
+
+        </div>
+
+        <div class="research-panel" data-phase="screen02">
+          <div class="rc-eyebrow">08 / Final Design</div>
+          <h2 class="rc-title">02. Campaign Landing</h2>
+
+          <div class="overview-section">
+            <div class="diagram-split-layout">
+
+              <!-- Left Column: lofi wireframe + overlay -->
+              <div class="wireframe-container">
+                <div class="phone-shell">
+                  <div class="phone-frame">
+                    <iframe src="../lofi/02-landing.html" title="02 - Campaign Landing Wireframe"></iframe>
+                  </div>
+                </div>
+                <div class="wireframe-overlay">
+                  <!-- Highlight 01: Hero illustration area (.hero-export, measured via getBoundingClientRect) -->
+                  <div class="overlay-highlight" style="top: 100px; left: 0px; width: 390px; height: 440px; border-radius: 0 0 22px 22px;">
+                    <span class="overlay-badge">01</span>
+                  </div>
+                  <!-- Highlight 02: Mystery reward preview card (.reward-pack, measured) -->
+                  <div class="overlay-highlight" style="top: 556px; left: 20px; width: 350px; height: 138px;">
+                    <span class="overlay-badge">02</span>
+                  </div>
+                  <!-- Highlight 03: Primary CTA (.cta-block .btn, measured) -->
+                  <div class="overlay-highlight" style="top: 716px; left: 20px; width: 350px; height: 50px;">
+                    <span class="overlay-badge">03</span>
+                  </div>
+                </div>
+
+                <!-- Annotation legend -->
+                <div style="margin-top: 16px; display: flex; flex-direction: column; gap: 12px; max-width: 412px;">
+                  <div style="display: flex; gap: 10px; align-items: flex-start;">
+                    <span class="overlay-badge" style="position: static; flex: none;">01</span>
+                    <p style="font-size: 12.5px; line-height: 1.45; color: var(--grey-1); margin: 0;"><strong style="color: var(--ink-max);">Hero Illustration</strong> — Opens with warmth and illustration instead of leading with discounts.</p>
+                  </div>
+                  <div style="display: flex; gap: 10px; align-items: flex-start;">
+                    <span class="overlay-badge" style="position: static; flex: none;">02</span>
+                    <p style="font-size: 12.5px; line-height: 1.45; color: var(--grey-1); margin: 0;"><strong style="color: var(--ink-max);">Mystery Reward Card</strong> — Hides reward contents to build curiosity before the photo is uploaded.</p>
+                  </div>
+                  <div style="display: flex; gap: 10px; align-items: flex-start;">
+                    <span class="overlay-badge" style="position: static; flex: none;">03</span>
+                    <p style="font-size: 12.5px; line-height: 1.45; color: var(--grey-1); margin: 0;"><strong style="color: var(--ink-max);">Primary CTA</strong> — The one clear action on this screen — upload a photo to continue.</p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Right Column: Design rationale -->
+              <div>
+                <!-- Section label + intro -->
+                <div style="margin-bottom: 28px;">
+                  <div class="diagram-insight-label">SCREEN 02</div>
+                  <h3 class="rc-title" style="font-size: 24px; margin-top: 4px; margin-bottom: 12px;">Campaign Landing</h3>
+                  <p class="overview-paragraph" style="font-size: 13.5px; line-height: 1.55;">
+                    The landing page shifts the experience from discovery to curiosity. Instead of promoting discounts, it builds anticipation around a simple idea — something has already been packed for your furry friend.
+                  </p>
+                </div>
+
+                <!-- Decision 01 -->
+                <div style="margin-bottom: 24px;">
+                  <h4 style="font-family: var(--font-display); font-size: 16px; font-weight: 750; color: var(--ink-max); margin-bottom: 8px;">01 — Emotional First Impression</h4>
+                  <p class="overview-paragraph" style="font-size: 13px; line-height: 1.5; color: var(--grey-1);">
+                    Starts with warmth, not rewards.
+                  </p>
+                  <ul class="comparison-list" style="margin-top: 10px; font-size: 12.5px; color: var(--grey-1); gap: 6px;">
+                    <li>Makes the campaign feel personal</li>
+                    <li>Matches Zepto's playful tone</li>
+                    <li>Builds trust before asking for action</li>
+                  </ul>
+                </div>
+
+                <!-- Decision 02 -->
+                <div style="margin-bottom: 24px;">
+                  <h4 style="font-family: var(--font-display); font-size: 16px; font-weight: 750; color: var(--ink-max); margin-bottom: 8px;">02 — Mystery Before Rewards</h4>
+                  <p class="overview-paragraph" style="font-size: 13px; line-height: 1.5; color: var(--grey-1);">
+                    Rewards stay hidden until upload.
+                  </p>
+                  <ul class="comparison-list" style="margin-top: 10px; font-size: 12.5px; color: var(--grey-1); gap: 6px;">
+                    <li>Creates anticipation</li>
+                    <li>Encourages completion</li>
+                    <li>Makes the reveal feel earned</li>
+                  </ul>
+                </div>
+
+                <!-- Decision 03 -->
+                <div style="margin-bottom: 24px;">
+                  <h4 style="font-family: var(--font-display); font-size: 16px; font-weight: 750; color: var(--ink-max); margin-bottom: 8px;">03 — One Clear Action</h4>
+                  <p class="overview-paragraph" style="font-size: 13px; line-height: 1.5; color: var(--grey-1);">
+                    Only one thing to do.
+                  </p>
+                  <ul class="comparison-list" style="margin-top: 10px; font-size: 12.5px; color: var(--grey-1); gap: 6px;">
+                    <li>Upload a photo</li>
+                    <li>No competing actions</li>
+                    <li>Fast, low-friction onboarding</li>
+                  </ul>
+                </div>
+
+                <!-- Callout: Why hide the rewards -->
+                <div class="challenge-card" style="background: var(--purple-tint); border-color: var(--purple); padding: 18px; margin-bottom: 24px;">
+                  <h5 style="font-family: var(--font-display); font-size: 14px; font-weight: 750; color: var(--purple-deep); margin-bottom: 6px;">Why hide the rewards?</h5>
+                  <p style="font-size: 12.5px; line-height: 1.45; color: var(--purple-deep); margin: 0;">
+                    Curiosity is stronger than explanation. Revealing everything upfront turns the experience into a discount page. A small mystery gives users a reason to continue.
+                  </p>
+                </div>
+
+                <!-- Visual Language -->
+                <div>
+                  <h4 style="font-family: var(--font-display); font-size: 16px; font-weight: 750; color: var(--ink-max); margin-bottom: 8px;">Visual Language</h4>
+                  <p class="overview-paragraph" style="font-size: 13px; line-height: 1.5; color: var(--grey-1);">
+                    Inspired by Zepto's campaign style.
+                  </p>
+                  <ul class="comparison-list" style="margin-top: 10px; font-size: 12.5px; color: var(--grey-1); gap: 6px;">
+                    <li>Soft illustrated artwork</li>
+                    <li>Friendly character-driven visuals</li>
+                    <li>Purple campaign palette</li>
+                    <li>Minimal decorative elements</li>
+                  </ul>
+                </div>
+
+              </div>
+
+            </div>
+          </div>
+
+        </div>
+
+        <div class="research-panel" data-phase="screen03">
+          <div class="rc-eyebrow">08 / Final Design</div>
+          <h2 class="rc-title">03. Upload &amp; Name</h2>
+
+          <div class="overview-section">
+            <p class="overview-paragraph">
+              The upload flow is intentionally kept lightweight. Instead of asking users to complete a long profile, only the information required to personalise the experience is collected.
+            </p>
+          </div>
+
+          <div class="overview-section">
+            <div class="diagram-split-layout">
+
+              <!-- Left Column: lofi wireframe + overlay -->
+              <div class="wireframe-container">
+                <div class="phone-shell">
+                  <div class="phone-frame">
+                    <iframe src="../lofi/03a-upload-empty.html" title="03a - Upload & Name Wireframe"></iframe>
+                  </div>
+                </div>
+                <div class="wireframe-overlay">
+                  <!-- Highlight 01: Upload Area (.stage, measured via getBoundingClientRect) -->
+                  <div class="overlay-highlight" style="top: 190px; left: 20px; width: 350px; height: 168px;">
+                    <span class="overlay-badge">01</span>
+                  </div>
+                  <!-- Highlight 02: Smart Form (.fields, measured) -->
+                  <div class="overlay-highlight" style="top: 388px; left: 20px; width: 350px; height: 202px;">
+                    <span class="overlay-badge">02</span>
+                  </div>
+                  <!-- Highlight 03: Continue CTA (.footer .cta, measured) -->
+                  <div class="overlay-highlight" style="top: 748px; left: 20px; width: 350px; height: 53px;">
+                    <span class="overlay-badge">03</span>
+                  </div>
+                </div>
+
+                <!-- Annotation legend -->
+                <div style="margin-top: 16px; display: flex; flex-direction: column; gap: 12px; max-width: 412px;">
+                  <div style="display: flex; gap: 10px; align-items: flex-start;">
+                    <span class="overlay-badge" style="position: static; flex: none;">01</span>
+                    <p style="font-size: 12.5px; line-height: 1.45; color: var(--grey-1); margin: 0;"><strong style="color: var(--ink-max);">Upload Area</strong> — Primary action begins with the pet photo.</p>
+                  </div>
+                  <div style="display: flex; gap: 10px; align-items: flex-start;">
+                    <span class="overlay-badge" style="position: static; flex: none;">02</span>
+                    <p style="font-size: 12.5px; line-height: 1.45; color: var(--grey-1); margin: 0;"><strong style="color: var(--ink-max);">Smart Form</strong> — Name and breed personalise the experience.</p>
+                  </div>
+                  <div style="display: flex; gap: 10px; align-items: flex-start;">
+                    <span class="overlay-badge" style="position: static; flex: none;">03</span>
+                    <p style="font-size: 12.5px; line-height: 1.45; color: var(--grey-1); margin: 0;"><strong style="color: var(--ink-max);">Continue CTA</strong> — Disabled until the minimum requirement (photo) is completed, preventing incomplete submissions.</p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Right Column: Design rationale -->
+              <div>
+                <!-- Section label + intro -->
+                <div style="margin-bottom: 28px;">
+                  <div class="diagram-insight-label">SCREEN 03</div>
+                  <h3 class="rc-title" style="font-size: 24px; margin-top: 4px; margin-bottom: 12px;">Upload &amp; Name</h3>
+                  <p class="overview-paragraph" style="font-size: 13.5px; line-height: 1.55;">
+                    Covers the full upload mini-flow — the empty state, the photo-source sheet, and the filled state once a photo is added.
+                  </p>
+                </div>
+
+                <!-- Decision 01 -->
+                <div style="margin-bottom: 24px;">
+                  <h4 style="font-family: var(--font-display); font-size: 16px; font-weight: 750; color: var(--ink-max); margin-bottom: 8px;">01 — One Pet at a Time</h4>
+                  <p class="overview-paragraph" style="font-size: 13px; line-height: 1.5; color: var(--grey-1);">
+                    The experience begins with a single pet.
+                  </p>
+                  <ul class="comparison-list" style="margin-top: 10px; font-size: 12.5px; color: var(--grey-1); gap: 6px;">
+                    <li>Faster to complete</li>
+                    <li>Simplifies image recognition</li>
+                    <li>Works for most users</li>
+                  </ul>
+                </div>
+
+                <!-- Decision 02 -->
+                <div style="margin-bottom: 24px;">
+                  <h4 style="font-family: var(--font-display); font-size: 16px; font-weight: 750; color: var(--ink-max); margin-bottom: 8px;">02 — Camera-First Upload</h4>
+                  <p class="overview-paragraph" style="font-size: 13px; line-height: 1.5; color: var(--grey-1);">
+                    The photo is the primary input.
+                  </p>
+                  <ul class="comparison-list" style="margin-top: 10px; font-size: 12.5px; color: var(--grey-1); gap: 6px;">
+                    <li>Personalises recommendations</li>
+                    <li>Enables breed detection</li>
+                    <li>Makes the experience feel tailored</li>
+                  </ul>
+                </div>
+
+                <!-- Decision 03 -->
+                <div style="margin-bottom: 24px;">
+                  <h4 style="font-family: var(--font-display); font-size: 16px; font-weight: 750; color: var(--ink-max); margin-bottom: 8px;">03 — Minimal Information</h4>
+                  <p class="overview-paragraph" style="font-size: 13px; line-height: 1.5; color: var(--grey-1);">
+                    Only two optional fields accompany the photo.
+                  </p>
+                  <ul class="comparison-list" style="margin-top: 10px; font-size: 12.5px; color: var(--grey-1); gap: 6px;">
+                    <li>Name creates a personal connection</li>
+                    <li>Breed improves recommendations</li>
+                  </ul>
+                </div>
+
+                <!-- Callout: Why not multiple pets -->
+                <div class="challenge-card" style="background: var(--purple-tint); border-color: var(--purple); padding: 18px; margin-bottom: 24px;">
+                  <h5 style="font-family: var(--font-display); font-size: 14px; font-weight: 750; color: var(--purple-deep); margin-bottom: 6px;">Why not support multiple pets here?</h5>
+                  <p style="font-size: 12.5px; line-height: 1.45; color: var(--purple-deep); margin: 0 0 8px;">
+                    Starting with multiple uploads introduced unnecessary complexity. Users would need to upload several images or explain which pet is which—adding friction before any value is delivered.
+                  </p>
+                  <p style="font-size: 12.5px; line-height: 1.45; color: var(--purple-deep); margin: 0;">
+                    Instead, the experience starts with one pet and reaches the reward moment quickly.
+                  </p>
+                </div>
+
+                <!-- Design Principles -->
+                <div>
+                  <h4 style="font-family: var(--font-display); font-size: 16px; font-weight: 750; color: var(--ink-max); margin-bottom: 8px;">Design Principles</h4>
+                  <ul class="comparison-list" style="margin-top: 10px; font-size: 12.5px; color: var(--grey-1); gap: 6px;">
+                    <li>One primary task</li>
+                    <li>Minimal typing</li>
+                    <li>Fast completion</li>
+                    <li>Personal, not transactional</li>
+                  </ul>
+                </div>
+
+              </div>
+
+            </div>
+          </div>
+
+        </div>
+
+        <div class="research-panel" data-phase="screen03c">
+          <div class="rc-eyebrow">08 / Final Design</div>
+          <h2 class="rc-title">03c. Add Another Pet</h2>
+
+          <div class="overview-section">
+            <p class="overview-paragraph">
+              The experience expands progressively. After completing the first pet, users can optionally add more household pets without affecting the simplicity of the initial onboarding.
+            </p>
+          </div>
+
+          <div class="overview-section">
+            <div class="diagram-split-layout">
+
+              <!-- Left Column: lofi wireframe + overlay -->
+              <div class="wireframe-container">
+                <div class="phone-shell">
+                  <div class="phone-frame">
+                    <iframe src="../lofi/03c-upload-second-pet.html" title="03c - Add Another Pet Wireframe"></iframe>
+                  </div>
+                </div>
+                <div class="wireframe-overlay">
+                  <!-- Highlight 01: Existing Pets (.roster, measured via getBoundingClientRect) -->
+                  <div class="overlay-highlight" style="top: 182px; left: 20px; width: 350px; height: 120px;">
+                    <span class="overlay-badge">01</span>
+                  </div>
+                  <!-- Highlight 02: Add Another Pet (.stage, measured) -->
+                  <div class="overlay-highlight" style="top: 324px; left: 20px; width: 350px; height: 168px;">
+                    <span class="overlay-badge">02</span>
+                  </div>
+                  <!-- Highlight 03: "That's everyone" (.footer .secondary, measured) -->
+                  <div class="overlay-highlight" style="top: 787px; left: 20px; width: 350px; height: 43px;">
+                    <span class="overlay-badge">03</span>
+                  </div>
+                </div>
+
+                <!-- Annotation legend -->
+                <div style="margin-top: 16px; display: flex; flex-direction: column; gap: 12px; max-width: 412px;">
+                  <div style="display: flex; gap: 10px; align-items: flex-start;">
+                    <span class="overlay-badge" style="position: static; flex: none;">01</span>
+                    <p style="font-size: 12.5px; line-height: 1.45; color: var(--grey-1); margin: 0;"><strong style="color: var(--ink-max);">Existing Pets</strong> — Shows completed pets, reassuring users that previous information has been saved.</p>
+                  </div>
+                  <div style="display: flex; gap: 10px; align-items: flex-start;">
+                    <span class="overlay-badge" style="position: static; flex: none;">02</span>
+                    <p style="font-size: 12.5px; line-height: 1.45; color: var(--grey-1); margin: 0;"><strong style="color: var(--ink-max);">Add Another Pet</strong> — Uses the same interaction pattern as the first upload, reducing the need to learn a new flow.</p>
+                  </div>
+                  <div style="display: flex; gap: 10px; align-items: flex-start;">
+                    <span class="overlay-badge" style="position: static; flex: none;">03</span>
+                    <p style="font-size: 12.5px; line-height: 1.45; color: var(--grey-1); margin: 0;"><strong style="color: var(--ink-max);">"That's everyone"</strong> — Provides a graceful exit for single-pet households, ensuring they never feel forced to continue.</p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Right Column: Design rationale -->
+              <div>
+                <!-- Section label -->
+                <div style="margin-bottom: 28px;">
+                  <div class="diagram-insight-label">SCREEN 03C</div>
+                  <h3 class="rc-title" style="font-size: 24px; margin-top: 4px; margin-bottom: 12px;">Add Another Pet</h3>
+                </div>
+
+                <!-- Decision 01 -->
+                <div style="margin-bottom: 24px;">
+                  <h4 style="font-family: var(--font-display); font-size: 16px; font-weight: 750; color: var(--ink-max); margin-bottom: 8px;">01 — Progressive Disclosure</h4>
+                  <p class="overview-paragraph" style="font-size: 13px; line-height: 1.5; color: var(--grey-1);">
+                    Support for multiple pets appears only after the first pet is completed.
+                  </p>
+                  <ul class="comparison-list" style="margin-top: 10px; font-size: 12.5px; color: var(--grey-1); gap: 6px;">
+                    <li>Keeps the initial flow lightweight</li>
+                    <li>Solves for both single- and multi-pet households</li>
+                    <li>Delays complexity until it's needed</li>
+                  </ul>
+                </div>
+
+                <!-- Decision 02 -->
+                <div style="margin-bottom: 24px;">
+                  <h4 style="font-family: var(--font-display); font-size: 16px; font-weight: 750; color: var(--ink-max); margin-bottom: 8px;">02 — Existing Pets Stay Visible</h4>
+                  <p class="overview-paragraph" style="font-size: 13px; line-height: 1.5; color: var(--grey-1);">
+                    Previously added pets appear as compact profile cards.
+                  </p>
+                  <ul class="comparison-list" style="margin-top: 10px; font-size: 12.5px; color: var(--grey-1); gap: 6px;">
+                    <li>Confirms successful completion</li>
+                    <li>Provides context while adding the next pet</li>
+                    <li>Helps users keep track of household members</li>
+                  </ul>
+                </div>
+
+                <!-- Decision 03 -->
+                <div style="margin-bottom: 24px;">
+                  <h4 style="font-family: var(--font-display); font-size: 16px; font-weight: 750; color: var(--ink-max); margin-bottom: 8px;">03 — Designed for Real Households</h4>
+                  <p class="overview-paragraph" style="font-size: 13px; line-height: 1.5; color: var(--grey-1);">
+                    Multiple pets are common, but group photos aren't.
+                  </p>
+                  <p class="overview-paragraph" style="font-size: 13px; line-height: 1.5; color: var(--grey-1); margin-top: 8px;">
+                    Instead of asking users to upload every pet at once, each pet is added individually. This is more reliable for AI processing and much easier for users to complete.
+                  </p>
+                </div>
+
+                <!-- Callout: Why not upload all pets together -->
+                <div class="challenge-card" style="background: var(--purple-tint); border-color: var(--purple); padding: 18px; margin-bottom: 24px;">
+                  <h5 style="font-family: var(--font-display); font-size: 14px; font-weight: 750; color: var(--purple-deep); margin-bottom: 6px;">Why not upload all pets together?</h5>
+                  <p style="font-size: 12.5px; line-height: 1.45; color: var(--purple-deep); margin: 0 0 8px;">
+                    We explored asking users to upload a single family photo or multiple photos in one step. Both approaches created unnecessary friction—users would need to identify each pet manually, and suitable group photos often don't exist.
+                  </p>
+                  <p style="font-size: 12.5px; line-height: 1.45; color: var(--purple-deep); margin: 0;">
+                    Adding one pet at a time keeps the experience simple while still supporting households with multiple pets.
+                  </p>
+                </div>
+
+                <!-- Design Principles -->
+                <div style="margin-bottom: 24px;">
+                  <h4 style="font-family: var(--font-display); font-size: 16px; font-weight: 750; color: var(--ink-max); margin-bottom: 8px;">Design Principles</h4>
+                  <ul class="comparison-list" style="margin-top: 10px; font-size: 12.5px; color: var(--grey-1); gap: 6px;">
+                    <li>Progressive complexity</li>
+                    <li>Household-first experience</li>
+                    <li>Clear progress visibility</li>
+                    <li>Optional, never forced</li>
+                  </ul>
+                </div>
+
+                <!-- Closing synthesis -->
+                <p class="overview-paragraph" style="font-size: 13px; line-height: 1.55; color: var(--grey-1);">
+                  This screen creates a clear transition in the story: the previous screen establishes the simplest possible onboarding, while this one demonstrates how the same flow scales naturally to households with multiple pets without increasing complexity for everyone else.
+                </p>
+
+              </div>
+
+            </div>
+          </div>
+
+        </div>
+
+        <div class="research-panel" data-phase="screen04">
+          <div class="rc-eyebrow">08 / Final Design</div>
+          <h2 class="rc-title">04. A Moment of Delight</h2>
+
+          <div class="overview-section">
+            <p class="overview-paragraph">
+              Before revealing rewards, the experience pauses for a small moment of delight. Instead of immediately showing coupons, the system introduces each pet with a personalised fact generated from its breed and profile.
+            </p>
+          </div>
+
+          <div class="overview-section">
+            <div class="diagram-split-layout">
+
+              <!-- Left Column: lofi wireframe + overlay -->
+              <div class="wireframe-container">
+                <div class="phone-shell">
+                  <div class="phone-frame">
+                    <iframe src="../lofi/04-meet.html" title="04 - A Moment of Delight Wireframe"></iframe>
+                  </div>
+                </div>
+                <div class="wireframe-overlay">
+                  <!-- Highlight 01: Pet Profile Card (.meet-card, measured via getBoundingClientRect) -->
+                  <div class="overlay-highlight" style="top: 181px; left: 50px; width: 290px; height: 422px; border-radius: 22px;">
+                    <span class="overlay-badge">01</span>
+                  </div>
+                  <!-- Highlight 02: Personalised Fun Fact (.meet-card .fact, measured) -->
+                  <div class="overlay-highlight" style="top: 515px; left: 65px; width: 260px; height: 65px;">
+                    <span class="overlay-badge">02</span>
+                  </div>
+                  <!-- Highlight 03: Swipe Indicator (.dots, measured) -->
+                  <div class="overlay-highlight" style="top: 621px; left: 176px; width: 39px; height: 15px;">
+                    <span class="overlay-badge">03</span>
+                  </div>
+                </div>
+
+                <!-- Annotation legend -->
+                <div style="margin-top: 16px; display: flex; flex-direction: column; gap: 12px; max-width: 412px;">
+                  <div style="display: flex; gap: 10px; align-items: flex-start;">
+                    <span class="overlay-badge" style="position: static; flex: none;">01</span>
+                    <p style="font-size: 12.5px; line-height: 1.45; color: var(--grey-1); margin: 0;"><strong style="color: var(--ink-max);">Pet Profile Card</strong> — Introduces each pet individually, making every household member feel recognised.</p>
+                  </div>
+                  <div style="display: flex; gap: 10px; align-items: flex-start;">
+                    <span class="overlay-badge" style="position: static; flex: none;">02</span>
+                    <p style="font-size: 12.5px; line-height: 1.45; color: var(--grey-1); margin: 0;"><strong style="color: var(--ink-max);">Personalised Fun Fact</strong> — AI-generated breed insights create a memorable moment that feels unique to each pet.</p>
+                  </div>
+                  <div style="display: flex; gap: 10px; align-items: flex-start;">
+                    <span class="overlay-badge" style="position: static; flex: none;">03</span>
+                    <p style="font-size: 12.5px; line-height: 1.45; color: var(--grey-1); margin: 0;"><strong style="color: var(--ink-max);">Swipe Indicator</strong> — Communicates that multiple pets can be browsed one at a time, creating a smooth transition into the reward reveal.</p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Right Column: Design rationale -->
+              <div>
+                <!-- Section label -->
+                <div style="margin-bottom: 28px;">
+                  <div class="diagram-insight-label">SCREEN 04</div>
+                  <h3 class="rc-title" style="font-size: 24px; margin-top: 4px; margin-bottom: 4px;">A Moment of Delight</h3>
+                  <p style="font-size: 11.5px; color: var(--grey-3); font-style: italic; margin: 0 0 12px;">In-app screen title stays "Meet your pets" — renamed here to communicate design intent to reviewers.</p>
+                </div>
+
+                <!-- Decision 01 -->
+                <div style="margin-bottom: 24px;">
+                  <h4 style="font-family: var(--font-display); font-size: 16px; font-weight: 750; color: var(--ink-max); margin-bottom: 8px;">01 — Reward Before the Reward</h4>
+                  <p class="overview-paragraph" style="font-size: 13px; line-height: 1.5; color: var(--grey-1);">
+                    The first reward isn't a coupon—it's recognition.
+                  </p>
+                  <ul class="comparison-list" style="margin-top: 10px; font-size: 12.5px; color: var(--grey-1); gap: 6px;">
+                    <li>Creates an emotional payoff</li>
+                    <li>Makes the upload feel worthwhile</li>
+                    <li>Builds anticipation for what's next</li>
+                  </ul>
+                </div>
+
+                <!-- Decision 02 -->
+                <div style="margin-bottom: 24px;">
+                  <h4 style="font-family: var(--font-display); font-size: 16px; font-weight: 750; color: var(--ink-max); margin-bottom: 8px;">02 — Personalised for Every Pet</h4>
+                  <p class="overview-paragraph" style="font-size: 13px; line-height: 1.5; color: var(--grey-1);">
+                    Each card is generated using the pet's information.
+                  </p>
+                  <ul class="comparison-list" style="margin-top: 10px; font-size: 12.5px; color: var(--grey-1); gap: 6px;">
+                    <li>Name</li>
+                    <li>Breed</li>
+                    <li>AI-generated fun fact</li>
+                  </ul>
+                  <p class="overview-paragraph" style="font-size: 13px; line-height: 1.5; color: var(--grey-1); margin-top: 8px;">
+                    Every pet receives its own introduction, making the experience feel uniquely tailored.
+                  </p>
+                </div>
+
+                <!-- Decision 03 -->
+                <div style="margin-bottom: 24px;">
+                  <h4 style="font-family: var(--font-display); font-size: 16px; font-weight: 750; color: var(--ink-max); margin-bottom: 8px;">03 — Lightweight Storytelling</h4>
+                  <p class="overview-paragraph" style="font-size: 13px; line-height: 1.5; color: var(--grey-1);">
+                    The cards are presented one at a time in a swipeable stack.
+                  </p>
+                  <ul class="comparison-list" style="margin-top: 10px; font-size: 12.5px; color: var(--grey-1); gap: 6px;">
+                    <li>Easy to consume</li>
+                    <li>Creates a playful rhythm</li>
+                    <li>Naturally leads into the reward reveal</li>
+                  </ul>
+                </div>
+
+                <!-- Callout: Why include this moment -->
+                <div class="challenge-card" style="background: var(--purple-tint); border-color: var(--purple); padding: 18px; margin-bottom: 24px;">
+                  <h5 style="font-family: var(--font-display); font-size: 14px; font-weight: 750; color: var(--purple-deep); margin-bottom: 6px;">Why include this moment?</h5>
+                  <p style="font-size: 12.5px; line-height: 1.45; color: var(--purple-deep); margin: 0;">
+                    Without this screen, the upload would feel like submitting a form only to receive discounts. This small pause transforms the interaction into an experience, helping users feel that the app has genuinely "met" their furry friend before revealing the rewards.
+                  </p>
+                </div>
+
+                <!-- Design Principles -->
+                <div>
+                  <h4 style="font-family: var(--font-display); font-size: 16px; font-weight: 750; color: var(--ink-max); margin-bottom: 8px;">Design Principles</h4>
+                  <ul class="comparison-list" style="margin-top: 10px; font-size: 12.5px; color: var(--grey-1); gap: 6px;">
+                    <li>Emotional connection</li>
+                    <li>AI-powered personalisation</li>
+                    <li>Delight before utility</li>
+                    <li>Progressive storytelling</li>
+                  </ul>
+                </div>
+
+              </div>
+
+            </div>
+          </div>
+
+        </div>
+
+        <div class="research-panel" data-phase="screen05">
+          <div class="rc-eyebrow">08 / Final Design</div>
+          <h2 class="rc-title">05. Rewards Unlocked</h2>
+
+          <div class="overview-section">
+            <p class="overview-paragraph">
+              The experience ends by transforming curiosity into value. Instead of revealing a single coupon, users unlock a small reward pack that feels personalised to their household and immediately usable on their next order.
+            </p>
+          </div>
+
+          <div class="overview-section">
+            <div class="diagram-split-layout">
+
+              <!-- Left Column: lofi wireframe + overlay -->
+              <div class="wireframe-container">
+                <div class="phone-shell">
+                  <div class="phone-frame">
+                    <iframe src="../lofi/05-reveal.html" title="05 - Rewards Unlocked Wireframe"></iframe>
+                  </div>
+                </div>
+                <div class="wireframe-overlay">
+                  <!-- Highlight 01: Celebration Hero (.head-block, measured via getBoundingClientRect) -->
+                  <div class="overlay-highlight" style="top: 248px; left: 0px; width: 390px; height: 83px;">
+                    <span class="overlay-badge">01</span>
+                  </div>
+                  <!-- Highlight 02: Reward Pack (.wallet, measured) -->
+                  <div class="overlay-highlight" style="top: 331px; left: 0px; width: 390px; height: 356px;">
+                    <span class="overlay-badge">02</span>
+                  </div>
+                  <!-- Highlight 03: Continue CTA (.sticky-footer .btn, measured) -->
+                  <div class="overlay-highlight" style="top: 754px; left: 20px; width: 350px; height: 50px;">
+                    <span class="overlay-badge">03</span>
+                  </div>
+                </div>
+
+                <!-- Annotation legend -->
+                <div style="margin-top: 16px; display: flex; flex-direction: column; gap: 12px; max-width: 412px;">
+                  <div style="display: flex; gap: 10px; align-items: flex-start;">
+                    <span class="overlay-badge" style="position: static; flex: none;">01</span>
+                    <p style="font-size: 12.5px; line-height: 1.45; color: var(--grey-1); margin: 0;"><strong style="color: var(--ink-max);">Celebration Hero</strong> — A visual confirmation that the journey is complete, creating a satisfying transition from anticipation to reward.</p>
+                  </div>
+                  <div style="display: flex; gap: 10px; align-items: flex-start;">
+                    <span class="overlay-badge" style="position: static; flex: none;">02</span>
+                    <p style="font-size: 12.5px; line-height: 1.45; color: var(--grey-1); margin: 0;"><strong style="color: var(--ink-max);">Reward Pack</strong> — All unlocked benefits are presented together, making the value immediately clear without additional taps.</p>
+                  </div>
+                  <div style="display: flex; gap: 10px; align-items: flex-start;">
+                    <span class="overlay-badge" style="position: static; flex: none;">03</span>
+                    <p style="font-size: 12.5px; line-height: 1.45; color: var(--grey-1); margin: 0;"><strong style="color: var(--ink-max);">Continue CTA</strong> — Takes users directly to their personalised Pet Care feed, where the rewards can be used immediately.</p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Right Column: Design rationale -->
+              <div>
+                <!-- Section label -->
+                <div style="margin-bottom: 28px;">
+                  <div class="diagram-insight-label">SCREEN 05</div>
+                  <h3 class="rc-title" style="font-size: 24px; margin-top: 4px; margin-bottom: 12px;">Rewards Unlocked</h3>
+                </div>
+
+                <!-- Decision 01 -->
+                <div style="margin-bottom: 24px;">
+                  <h4 style="font-family: var(--font-display); font-size: 16px; font-weight: 750; color: var(--ink-max); margin-bottom: 8px;">01 — Celebrate Before Utility</h4>
+                  <p class="overview-paragraph" style="font-size: 13px; line-height: 1.5; color: var(--grey-1);">
+                    The reveal opens with a lightweight celebration before presenting the rewards.
+                  </p>
+                  <ul class="comparison-list" style="margin-top: 10px; font-size: 12.5px; color: var(--grey-1); gap: 6px;">
+                    <li>Creates a sense of achievement</li>
+                    <li>Makes the journey feel complete</li>
+                    <li>Gives the rewards emotional context</li>
+                  </ul>
+                </div>
+
+                <!-- Decision 02 -->
+                <div style="margin-bottom: 24px;">
+                  <h4 style="font-family: var(--font-display); font-size: 16px; font-weight: 750; color: var(--ink-max); margin-bottom: 8px;">02 — Household-Level Rewards</h4>
+                  <p class="overview-paragraph" style="font-size: 13px; line-height: 1.5; color: var(--grey-1);">
+                    Rewards belong to the entire household, not a single pet.
+                  </p>
+                  <ul class="comparison-list" style="margin-top: 10px; font-size: 12.5px; color: var(--grey-1); gap: 6px;">
+                    <li>Supports multiple-pet families</li>
+                    <li>Benefits every future pet order</li>
+                    <li>Reinforces the idea of a shared reward pack</li>
+                  </ul>
+                </div>
+
+                <!-- Decision 03 -->
+                <div style="margin-bottom: 24px;">
+                  <h4 style="font-family: var(--font-display); font-size: 16px; font-weight: 750; color: var(--ink-max); margin-bottom: 8px;">03 — Immediate Next Step</h4>
+                  <p class="overview-paragraph" style="font-size: 13px; line-height: 1.5; color: var(--grey-1);">
+                    The experience flows directly into shopping.
+                  </p>
+                  <ul class="comparison-list" style="margin-top: 10px; font-size: 12.5px; color: var(--grey-1); gap: 6px;">
+                    <li>Rewards are ready to use</li>
+                    <li>No additional activation</li>
+                    <li>One tap continues to personalised recommendations</li>
+                  </ul>
+                </div>
+
+                <!-- Callout: Why reveal everything together -->
+                <div class="challenge-card" style="background: var(--purple-tint); border-color: var(--purple); padding: 18px; margin-bottom: 24px;">
+                  <h5 style="font-family: var(--font-display); font-size: 14px; font-weight: 750; color: var(--purple-deep); margin-bottom: 6px;">Why reveal everything together?</h5>
+                  <p style="font-size: 12.5px; line-height: 1.45; color: var(--purple-deep); margin: 0;">
+                    Instead of unlocking rewards one by one, the entire reward pack is revealed at once. This creates a stronger payoff after the upload journey while reducing unnecessary interactions before users return to shopping.
+                  </p>
+                </div>
+
+                <!-- Design Principles -->
+                <div>
+                  <h4 style="font-family: var(--font-display); font-size: 16px; font-weight: 750; color: var(--ink-max); margin-bottom: 8px;">Design Principles</h4>
+                  <ul class="comparison-list" style="margin-top: 10px; font-size: 12.5px; color: var(--grey-1); gap: 6px;">
+                    <li>Celebrate completion</li>
+                    <li>Instant value</li>
+                    <li>Household-first rewards</li>
+                    <li>Seamless transition back to shopping</li>
+                  </ul>
+                </div>
+
+              </div>
+
+            </div>
+          </div>
+
+        </div>
+
+        <div class="research-panel" data-phase="screen06">
+          <div class="rc-eyebrow">08 / Final Design</div>
+          <h2 class="rc-title">06. Personalised Pet Care</h2>
+
+          <div class="overview-section">
+            <p class="overview-paragraph">
+              The reward journey naturally transitions into a curated shopping experience. Instead of dropping users into a generic catalogue, the feed adapts to each pet's profile, making product discovery more relevant from the very first screen.
+            </p>
+          </div>
+
+          <div class="overview-section">
+            <div class="diagram-split-layout">
+
+              <!-- Left Column: lofi wireframe + overlay -->
+              <div class="wireframe-container">
+                <div class="phone-shell">
+                  <div class="phone-frame">
+                    <iframe src="../lofi/06-picks.html" title="06 - Personalised Pet Care Wireframe"></iframe>
+                  </div>
+                </div>
+                <div class="wireframe-overlay">
+                  <!-- Highlight 01: Pet Switcher (.rcat--pet items, measured via getBoundingClientRect) -->
+                  <div class="overlay-highlight" style="top: 99px; left: 0px; width: 91px; height: 190px;">
+                    <span class="overlay-badge">01</span>
+                  </div>
+                  <!-- Highlight 02: Personalised Recommendation Card (.banner, measured) -->
+                  <div class="overlay-highlight" style="top: 153px; left: 106px; width: 270px; height: 96px;">
+                    <span class="overlay-badge">02</span>
+                  </div>
+                  <!-- Highlight 03: Curated Product Feed (.grid, measured) -->
+                  <div class="overlay-highlight" style="top: 265px; left: 106px; width: 270px; height: 508px;">
+                    <span class="overlay-badge">03</span>
+                  </div>
+                  <!-- Highlight 04: Persistent Reward Bar (.reward-bar, measured) -->
+                  <div class="overlay-highlight" style="top: 746px; left: 14px; width: 362px; height: 64px;">
+                    <span class="overlay-badge">04</span>
+                  </div>
+                </div>
+
+                <!-- Annotation legend -->
+                <div style="margin-top: 16px; display: flex; flex-direction: column; gap: 12px; max-width: 412px;">
+                  <div style="display: flex; gap: 10px; align-items: flex-start;">
+                    <span class="overlay-badge" style="position: static; flex: none;">01</span>
+                    <p style="font-size: 12.5px; line-height: 1.45; color: var(--grey-1); margin: 0;"><strong style="color: var(--ink-max);">Pet Switcher</strong> — Quickly switch between registered pets, updating the feed for each profile.</p>
+                  </div>
+                  <div style="display: flex; gap: 10px; align-items: flex-start;">
+                    <span class="overlay-badge" style="position: static; flex: none;">02</span>
+                    <p style="font-size: 12.5px; line-height: 1.45; color: var(--grey-1); margin: 0;"><strong style="color: var(--ink-max);">Personalised Recommendation Card</strong> — Introduces breed-specific guidance before users start browsing.</p>
+                  </div>
+                  <div style="display: flex; gap: 10px; align-items: flex-start;">
+                    <span class="overlay-badge" style="position: static; flex: none;">03</span>
+                    <p style="font-size: 12.5px; line-height: 1.45; color: var(--grey-1); margin: 0;"><strong style="color: var(--ink-max);">Curated Product Feed</strong> — Products are prioritised based on the selected pet rather than showing a generic catalogue.</p>
+                  </div>
+                  <div style="display: flex; gap: 10px; align-items: flex-start;">
+                    <span class="overlay-badge" style="position: static; flex: none;">04</span>
+                    <p style="font-size: 12.5px; line-height: 1.45; color: var(--grey-1); margin: 0;"><strong style="color: var(--ink-max);">Persistent Reward Bar</strong> — Keeps unlocked benefits visible throughout shopping, reinforcing the value earned without interrupting the experience.</p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Right Column: Design rationale -->
+              <div>
+                <!-- Section label -->
+                <div style="margin-bottom: 28px;">
+                  <div class="diagram-insight-label">SCREEN 06</div>
+                  <h3 class="rc-title" style="font-size: 24px; margin-top: 4px; margin-bottom: 12px;">Personalised Pet Care</h3>
+                </div>
+
+                <!-- Decision 01 -->
+                <div style="margin-bottom: 24px;">
+                  <h4 style="font-family: var(--font-display); font-size: 16px; font-weight: 750; color: var(--ink-max); margin-bottom: 8px;">01 — Recommendations That Feel Personal</h4>
+                  <p class="overview-paragraph" style="font-size: 13px; line-height: 1.5; color: var(--grey-1);">
+                    The feed begins with products suited to the selected pet.
+                  </p>
+                  <ul class="comparison-list" style="margin-top: 10px; font-size: 12.5px; color: var(--grey-1); gap: 6px;">
+                    <li>Breed-aware recommendations</li>
+                    <li>Relevant food and treats first</li>
+                    <li>Reduces browsing effort</li>
+                  </ul>
+                </div>
+
+                <!-- Decision 02 -->
+                <div style="margin-bottom: 24px;">
+                  <h4 style="font-family: var(--font-display); font-size: 16px; font-weight: 750; color: var(--ink-max); margin-bottom: 8px;">02 — Switch Between Pets</h4>
+                  <p class="overview-paragraph" style="font-size: 13px; line-height: 1.5; color: var(--grey-1);">
+                    Each registered pet gets its own personalised feed.
+                  </p>
+                  <ul class="comparison-list" style="margin-top: 10px; font-size: 12.5px; color: var(--grey-1); gap: 6px;">
+                    <li>One tap to switch profiles</li>
+                    <li>Recommendations update instantly</li>
+                    <li>Supports multi-pet households naturally</li>
+                  </ul>
+                </div>
+
+                <!-- Decision 03 -->
+                <div style="margin-bottom: 24px;">
+                  <h4 style="font-family: var(--font-display); font-size: 16px; font-weight: 750; color: var(--ink-max); margin-bottom: 8px;">03 — Rewards Stay Visible</h4>
+                  <p class="overview-paragraph" style="font-size: 13px; line-height: 1.5; color: var(--grey-1);">
+                    Unlocked benefits remain present while shopping.
+                  </p>
+                  <ul class="comparison-list" style="margin-top: 10px; font-size: 12.5px; color: var(--grey-1); gap: 6px;">
+                    <li>Free delivery reminder</li>
+                    <li>Rewards stay top-of-mind</li>
+                    <li>Encourages immediate redemption</li>
+                  </ul>
+                </div>
+
+                <!-- Callout: Why personalise the catalogue -->
+                <div class="challenge-card" style="background: var(--purple-tint); border-color: var(--purple); padding: 18px; margin-bottom: 24px;">
+                  <h5 style="font-family: var(--font-display); font-size: 14px; font-weight: 750; color: var(--purple-deep); margin-bottom: 6px;">Why personalise the catalogue?</h5>
+                  <p style="font-size: 12.5px; line-height: 1.45; color: var(--purple-deep); margin: 0;">
+                    The upload experience shouldn't end with coupons. By adapting the catalogue to each pet, the campaign demonstrates immediate value—showing users that their information is being used to make shopping easier, not just to unlock rewards.
+                  </p>
+                </div>
+
+                <!-- Design Principles -->
+                <div style="margin-bottom: 24px;">
+                  <h4 style="font-family: var(--font-display); font-size: 16px; font-weight: 750; color: var(--ink-max); margin-bottom: 8px;">Design Principles</h4>
+                  <ul class="comparison-list" style="margin-top: 10px; font-size: 12.5px; color: var(--grey-1); gap: 6px;">
+                    <li>Personalised discovery</li>
+                    <li>Context-aware recommendations</li>
+                    <li>Household flexibility</li>
+                    <li>Rewards integrated into shopping</li>
+                  </ul>
+                </div>
+
+                <!-- Closing synthesis -->
+                <p class="overview-paragraph" style="font-size: 13px; line-height: 1.55; color: var(--grey-1);">
+                  This screen should feel like the answer to the user's implicit question: "What changed after I uploaded my pet?" The answer is simple—the entire shopping experience becomes more relevant.
+                </p>
+
+              </div>
+
+            </div>
+          </div>
+
+        </div>
+
+        <div class="research-panel" data-phase="screen07">
+          <div class="rc-eyebrow">08 / Final Design</div>
+          <h2 class="rc-title">07. Reward Entry from Cart</h2>
+
+          <div class="overview-section">
+            <p class="overview-paragraph">
+              The campaign also appears contextually inside the cart, reaching users when rewards are most valuable. Instead of interrupting checkout, it presents a lightweight invitation to unlock benefits before placing the order.
+            </p>
+          </div>
+
+          <div class="overview-section">
+            <div class="diagram-split-layout">
+
+              <!-- Left Column: lofi wireframe + overlay -->
+              <div class="wireframe-container">
+                <div class="phone-shell">
+                  <div class="phone-frame">
+                    <iframe src="../lofi/07-cart-unclaimed.html" title="07 - Reward Entry from Cart Wireframe"></iframe>
+                  </div>
+                </div>
+                <div class="wireframe-overlay">
+                  <!-- Highlight 01: Campaign Coupon Card (.crow--pet, measured via getBoundingClientRect) -->
+                  <div class="overlay-highlight" style="top: 195px; left: 26px; width: 338px; height: 97px;">
+                    <span class="overlay-badge">01</span>
+                  </div>
+                  <!-- Highlight 02: Primary Unlock CTA (.crow--pet .cta-sm, measured) -->
+                  <div class="overlay-highlight" style="top: 227px; left: 277px; width: 73px; height: 34px;">
+                    <span class="overlay-badge">02</span>
+                  </div>
+                  <!-- Highlight 03: Existing Coupon Stack (the two plain .crow rows, measured) -->
+                  <div class="overlay-highlight" style="top: 321px; left: 30px; width: 330px; height: 102px;">
+                    <span class="overlay-badge">03</span>
+                  </div>
+                </div>
+
+                <!-- Annotation legend -->
+                <div style="margin-top: 16px; display: flex; flex-direction: column; gap: 12px; max-width: 412px;">
+                  <div style="display: flex; gap: 10px; align-items: flex-start;">
+                    <span class="overlay-badge" style="position: static; flex: none;">01</span>
+                    <p style="font-size: 12.5px; line-height: 1.45; color: var(--grey-1); margin: 0;"><strong style="color: var(--ink-max);">Campaign Coupon Card</strong> — Introduces the campaign as a contextual reward opportunity within the existing coupons section.</p>
+                  </div>
+                  <div style="display: flex; gap: 10px; align-items: flex-start;">
+                    <span class="overlay-badge" style="position: static; flex: none;">02</span>
+                    <p style="font-size: 12.5px; line-height: 1.45; color: var(--grey-1); margin: 0;"><strong style="color: var(--ink-max);">Primary Unlock CTA</strong> — Starts the pet onboarding flow with a single tap, without disrupting the checkout process.</p>
+                  </div>
+                  <div style="display: flex; gap: 10px; align-items: flex-start;">
+                    <span class="overlay-badge" style="position: static; flex: none;">03</span>
+                    <p style="font-size: 12.5px; line-height: 1.45; color: var(--grey-1); margin: 0;"><strong style="color: var(--ink-max);">Existing Coupon Stack</strong> — Reinforces that the campaign is integrated into Zepto's current rewards ecosystem rather than behaving like a standalone feature.</p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Right Column: Design rationale -->
+              <div>
+                <!-- Section label -->
+                <div style="margin-bottom: 28px;">
+                  <div class="diagram-insight-label">SCREEN 07</div>
+                  <h3 class="rc-title" style="font-size: 24px; margin-top: 4px; margin-bottom: 12px;">Reward Entry from Cart</h3>
+                </div>
+
+                <!-- Decision 01 -->
+                <div style="margin-bottom: 24px;">
+                  <h4 style="font-family: var(--font-display); font-size: 16px; font-weight: 750; color: var(--ink-max); margin-bottom: 8px;">01 — Contextual Discovery</h4>
+                  <p class="overview-paragraph" style="font-size: 13px; line-height: 1.5; color: var(--grey-1);">
+                    The campaign surfaces when users are about to purchase.
+                  </p>
+                  <ul class="comparison-list" style="margin-top: 10px; font-size: 12.5px; color: var(--grey-1); gap: 6px;">
+                    <li>High purchase intent</li>
+                    <li>Relevant timing</li>
+                    <li>No interruption to checkout</li>
+                  </ul>
+                </div>
+
+                <!-- Decision 02 -->
+                <div style="margin-bottom: 24px;">
+                  <h4 style="font-family: var(--font-display); font-size: 16px; font-weight: 750; color: var(--ink-max); margin-bottom: 8px;">02 — Existing System, New Reward</h4>
+                  <p class="overview-paragraph" style="font-size: 13px; line-height: 1.5; color: var(--grey-1);">
+                    The campaign lives alongside Zepto's existing coupon system.
+                  </p>
+                  <ul class="comparison-list" style="margin-top: 10px; font-size: 12.5px; color: var(--grey-1); gap: 6px;">
+                    <li>Feels native to the app</li>
+                    <li>Uses familiar UI patterns</li>
+                    <li>No new learning required</li>
+                  </ul>
+                </div>
+
+                <!-- Decision 03 -->
+                <div style="margin-bottom: 24px;">
+                  <h4 style="font-family: var(--font-display); font-size: 16px; font-weight: 750; color: var(--ink-max); margin-bottom: 8px;">03 — Clear Value Proposition</h4>
+                  <p class="overview-paragraph" style="font-size: 13px; line-height: 1.5; color: var(--grey-1);">
+                    The reward is explained before asking for participation.
+                  </p>
+                  <ul class="comparison-list" style="margin-top: 10px; font-size: 12.5px; color: var(--grey-1); gap: 6px;">
+                    <li>Free delivery highlighted first</li>
+                    <li>Additional savings previewed</li>
+                    <li>One tap starts the experience</li>
+                  </ul>
+                </div>
+
+                <!-- Callout: Why introduce the campaign in the cart -->
+                <div class="challenge-card" style="background: var(--purple-tint); border-color: var(--purple); padding: 18px; margin-bottom: 24px;">
+                  <h5 style="font-family: var(--font-display); font-size: 14px; font-weight: 750; color: var(--purple-deep); margin-bottom: 6px;">Why introduce the campaign in the cart?</h5>
+                  <p style="font-size: 12.5px; line-height: 1.45; color: var(--purple-deep); margin: 0;">
+                    Not every user discovers campaigns from the Home feed. Surfacing the opportunity inside the cart creates a second entry point at the moment rewards matter most, improving discoverability without interrupting the purchase journey.
+                  </p>
+                </div>
+
+                <!-- Design Principles -->
+                <div>
+                  <h4 style="font-family: var(--font-display); font-size: 16px; font-weight: 750; color: var(--ink-max); margin-bottom: 8px;">Design Principles</h4>
+                  <ul class="comparison-list" style="margin-top: 10px; font-size: 12.5px; color: var(--grey-1); gap: 6px;">
+                    <li>Contextual engagement</li>
+                    <li>Native platform integration</li>
+                    <li>High-intent timing</li>
+                    <li>Minimal checkout friction</li>
+                  </ul>
+                </div>
+
+              </div>
+
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <section class="cs-view" id="view-prototype" data-view="prototype" hidden>
+    <div class="proto-view-inner">
+      <div class="cs-section-head">
+        <div class="cs-section-eyebrow">02</div>
+        <h2 class="cs-section-title">Prototype</h2>
+        <p class="cs-section-sub">The real flow, live and clickable — from home feed to reward pack to picks.</p>
+      </div>
+
+      <div class="proto-wrap">
+        <div class="proto-controls">
+          <button class="proto-btn" id="restart-demo" type="button">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 1 3 6.7"/><path d="M3 21v-6h6"/></svg>
+            Restart demo
+          </button>
+          <span class="proto-hint">Click through the flow inside the frame</span>
+        </div>
+
+        <div class="phone-shell">
+          <div class="phone-frame">
+            <iframe id="proto-frame" src="../hifi/01-entry.html" title="Interactive prototype"></iframe>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="cs-footer">Meet Your Pet, Unlock Rewards — a Zepto concept, designed for the TATA 1mg PD1 assignment.</footer>
+
+<div class="floating-toggle" role="tablist" aria-label="Switch section">
+  <span class="ft-highlight" aria-hidden="true"></span>
+  <button class="ft-option" data-target="overview" type="button" role="tab">Overview</button>
+  <button class="ft-option" data-target="prototype" type="button" role="tab">Prototype</button>
+</div>
+
+<script>
+  document.getElementById('restart-demo').addEventListener('click', function () {
+    var frame = document.getElementById('proto-frame');
+    frame.src = '../hifi/01-entry.html';
+  });
+
+  // ---------- top-level view switch (Research <-> Prototype), never shared scroll ----------
+  (function () {
+    var toggle = document.querySelector('.floating-toggle');
+    var highlight = toggle.querySelector('.ft-highlight');
+    var options = Array.prototype.slice.call(toggle.querySelectorAll('.ft-option'));
+    var views = Array.prototype.slice.call(document.querySelectorAll('.cs-view'));
+
+    function moveHighlight(btn) {
+      var toggleRect = toggle.getBoundingClientRect();
+      var btnRect = btn.getBoundingClientRect();
+      highlight.style.width = btnRect.width + 'px';
+      highlight.style.transform = 'translateX(' + (btnRect.left - toggleRect.left - 5) + 'px)';
+    }
+
+    function setView(target) {
+      views.forEach(function (v) { v.hidden = v.dataset.view !== target; });
+      options.forEach(function (opt) {
+        var active = opt.dataset.target === target;
+        opt.classList.toggle('is-active', active);
+        if (active) moveHighlight(opt);
+      });
+      window.scrollTo(0, 0);
+    }
+
+    options.forEach(function (opt) {
+      opt.addEventListener('click', function () { setView(opt.dataset.target); });
+    });
+
+    setView('overview');
+    window.addEventListener('load', function () {
+      var active = options.find(function (o) { return o.classList.contains('is-active'); });
+      if (active) moveHighlight(active);
+    });
+    window.addEventListener('resize', function () {
+      var active = toggle.querySelector('.ft-option.is-active');
+      if (active) moveHighlight(active);
+    });
+  })();
+
+  // ---------- research sub-navigation (Structure sidebar) ----------
+  (function () {
+    var nav = document.getElementById('structure-nav');
+    var items = Array.prototype.slice.call(nav.querySelectorAll('.structure-item'));
+    var panels = Array.prototype.slice.call(document.querySelectorAll('.research-panel'));
+
+    var isScrolling = false;
+    var scrollTimeout;
+
+    // Smooth scroll to panel on click
+    items.forEach(function (item) {
+      item.addEventListener('click', function (e) {
+        if (item.disabled) return;
+        
+        var targetPanel = document.querySelector('.research-panel[data-phase="' + item.dataset.phase + '"]');
+        if (targetPanel) {
+          isScrolling = true;
+          clearTimeout(scrollTimeout);
+          
+          items.forEach(function (i) { i.classList.toggle('is-active', i === item); });
+          
+          // Scroll with a minor offset (e.g. -40px) for layout breathing room
+          var yOffset = -40;
+          var y = targetPanel.getBoundingClientRect().top + window.pageYOffset + yOffset;
+          
+          window.scrollTo({ top: y, behavior: 'smooth' });
+          
+          // Re-enable observer after scroll finishes
+          scrollTimeout = setTimeout(function () {
+            isScrolling = false;
+          }, 800);
+        }
+      });
+    });
+
+    // Update active sidebar item on scroll (Scrollspy)
+    var observerOptions = {
+      root: null,
+      rootMargin: '-10% 0px -75% 0px', // Trigger when section is in the active reading area
+      threshold: 0
+    };
+
+    var observer = new IntersectionObserver(function (entries) {
+      if (isScrolling) return;
+      entries.forEach(function (entry) {
+        if (entry.isIntersecting) {
+          var phase = entry.target.dataset.phase;
+          items.forEach(function (item) {
+            item.classList.toggle('is-active', item.dataset.phase === phase);
+          });
+        }
+      });
+    }, observerOptions);
+
+    panels.forEach(function (panel) {
+      observer.observe(panel);
+    });
+  })();
+</script>
+
+</body>
+</html>

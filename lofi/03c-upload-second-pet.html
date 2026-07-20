@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>03c · Upload &amp; name — second pet</title>
+<link rel="stylesheet" href="../shared/tokens-lofi.css">
+<link rel="stylesheet" href="../shared/device.css">
+<link rel="stylesheet" href="../shared/upload.css">
+<style>
+  /* second-pet screen is denser (carries a roster) — tighten the rhythm
+     so the indie helper stays above the fold */
+  .upl .roster { margin-top: 22px; }
+  .upl .stage  { margin-top: 22px; }
+  .upl .fields { margin-top: 24px; }
+</style>
+</head>
+<body>
+<div class="device">
+<div class="screen upl screen--shell">
+
+  <div class="statusbar">
+    <span class="time">9:41</span>
+    <span class="cluster"><i class="sig"></i><i class="wifi"></i><i class="batt"></i></span>
+  </div>
+
+  <div class="topbar">
+    <div class="cc"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg></div>
+  </div>
+
+  <div class="body">
+    <h1 class="h1">Who else lives with you?</h1>
+    <p class="sub">Same again — a photo, a name, a breed.</p>
+
+    <!-- roster: Mike already added, shown as a rounded-square card (not a pill) -->
+    <div class="roster">
+      <div class="roster-label">Your pets</div>
+      <div class="roster-row">
+        <div class="rcell">
+          <div class="rcard"><div class="check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l4 4 10-10"/></svg></div></div>
+          <div class="rname">Mike</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- same upload process as 03a: centered placeholder → bottom sheet on tap -->
+    <div class="stage">
+      <div class="ph">
+        <div class="plus"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></div>
+        <div class="cap">Add photo</div>
+      </div>
+    </div>
+
+    <div class="fields">
+      <div class="field">
+        <label class="flabel">Their name</label>
+        <div class="input ph-text">e.g. Meesha</div>
+      </div>
+      <div class="field">
+        <label class="flabel">Their breed</label>
+        <div class="input ph-text">e.g. Indie cat</div>
+      </div>
+      <p class="helper">Indie and mixed are perfect answers.</p>
+    </div>
+  </div>
+
+  <div class="footer">
+    <button class="cta cta--off">Continue</button>
+    <button class="secondary">That’s everyone</button>
+  </div>
+
+</div>
+</div>
+</body>
+</html>

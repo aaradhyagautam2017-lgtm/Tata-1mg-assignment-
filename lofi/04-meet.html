@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>04 · Meet your pets — the beat</title>
+<link rel="stylesheet" href="../shared/tokens-lofi.css">
+<link rel="stylesheet" href="../shared/device.css">
+<style>
+  .stage {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 0 20px;
+  }
+  .eyebrow {
+    font-size: 12px; font-weight: 500; letter-spacing: 1.2px;
+    text-transform: uppercase; color: var(--ink-3);
+    margin-bottom: 22px;
+  }
+  .deck { position: relative; width: 290px; }
+  /* the card behind — Meesha, peeking */
+  .deck .behind {
+    position: absolute; inset: 0;
+    background: var(--card);
+    border: 1.5px solid var(--line);
+    border-radius: 24px;
+    transform: rotate(4deg) translateX(10px);
+  }
+  .meet-card {
+    position: relative;
+    background: var(--card);
+    border: 1.5px solid var(--line);
+    border-radius: 24px;
+    padding: 14px 14px 22px;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.06);
+  }
+  .meet-card .photo {
+    height: 240px;
+    background: var(--fill-2);
+    border-radius: 16px;
+  }
+  .meet-card .name { font-size: 24px; font-weight: 700; margin-top: 16px; text-align: center; }
+  .meet-card .breed { font-size: 13px; color: var(--ink-3); text-align: center; margin-top: 2px; }
+  .meet-card .fact {
+    font-size: 14.5px; line-height: 1.5; color: var(--ink-2);
+    text-align: center; margin-top: 12px; padding: 0 8px;
+  }
+  .dots { display: flex; gap: 6px; justify-content: center; margin-top: 22px; }
+  .dots i { width: 7px; height: 7px; border-radius: 50%; background: var(--fill-3); }
+  .dots i.on { background: var(--ink-2); width: 18px; border-radius: 4px; }
+  .tap-hint { text-align: center; font-size: 12.5px; color: var(--ink-3); padding-bottom: 8px; }
+  .motion-note { margin: 0 20px 14px; }
+</style>
+</head>
+<body>
+<div class="device">
+<div class="screen screen--shell">
+
+  <div class="statusbar">
+    <span class="time">9:41</span>
+    <span class="cluster"><i class="sig"></i><i class="wifi"></i><i class="batt"></i></span>
+  </div>
+
+  <!-- transition beat: no input, no chrome to manage — the only exit is forward -->
+
+  <div class="stage">
+    <div class="eyebrow">Meet your pets</div>
+
+    <div class="deck">
+      <div class="behind"></div>
+      <div class="meet-card">
+        <div class="photo"></div>
+        <div class="name">Mike</div>
+        <div class="breed">Labrador</div>
+        <p class="fact">Labs are famously food-motivated — Mike will forgive you anything for a treat.</p>
+      </div>
+    </div>
+
+    <div class="dots"><i class="on"></i><i></i></div>
+  </div>
+
+  <p class="annot motion-note">Motion beat (phase 2): card settles in, name writes on, fact fades up. Swipe between pets — one screen, stacked cards, never a queue of screens. Auto-advances; any tap skips.</p>
+
+  <div class="tap-hint">Tap anywhere to continue</div>
+  <div class="home-indicator"></div>
+
+</div>
+</div>
+</body>
+</html>

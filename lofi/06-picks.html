@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>06 · Pet Care PLP — personalized categories</title>
+<link rel="stylesheet" href="../shared/tokens-lofi.css">
+<link rel="stylesheet" href="../shared/device.css">
+<style>
+  /* ---------------------------------------------------------
+     06 — Zepto PLP structure, elevated greyscale.
+     Scoped to .plp; no other screen touched.
+     Personalization: first two rail categories are the pets.
+     --------------------------------------------------------- */
+  .plp {
+    --bg:      #ffffff;
+    --card:    #ffffff;
+    --ink:     #1a1a1c;
+    --ink-2:   #6a6a70;
+    --ink-3:   #a2a2a8;
+    --hair:    #ececef;
+    --tint:    #f4f4f6;
+    --dashc:   #b6b6bc;
+    --shadow-sm: 0 4px 14px rgba(20,20,28,.06);
+    background: var(--bg);
+    color: var(--ink);
+  }
+  .plp .statusbar .time { color: var(--ink); }
+  .plp .statusbar .cluster i { background: #202024; }
+
+  /* ---------- PLP header ---------- */
+  .plp .plp-head {
+    display: flex; align-items: center; gap: 12px;
+    padding: 6px 18px 12px;
+  }
+  .plp .plp-head svg { width: 21px; height: 21px; }
+  .plp .plp-title { font-size: 19px; font-weight: 700; letter-spacing: -.2px; flex: 1; }
+  .plp .head-ic { color: var(--ink); display: grid; place-items: center; }
+  .plp .head-ic + .head-ic { margin-left: 4px; }
+
+  /* ---------- two-pane body ---------- */
+  .plp .plp-body { flex: 1; display: flex; overflow: hidden; border-top: 1px solid var(--hair); }
+
+  /* left category rail */
+  .plp .rail {
+    width: 92px; flex: none;
+    overflow-y: auto; scrollbar-width: none;
+    border-right: 1px solid var(--hair);
+    padding: 10px 0 90px;
+  }
+  .plp .rail::-webkit-scrollbar { display: none; }
+  .plp .rcat {
+    display: flex; flex-direction: column; align-items: center; gap: 6px;
+    padding: 10px 6px; position: relative;
+  }
+  .plp .rcat .tile {
+    width: 56px; height: 56px; border-radius: 16px;
+    background: var(--tint);
+  }
+  .plp .rcat .rlabel {
+    font-size: 10.5px; font-weight: 500; color: var(--ink-2);
+    text-align: center; line-height: 1.25;
+  }
+  /* our inserted elements — pet categories, dashed per lo-fi grammar */
+  .plp .rcat--pet .tile {
+    border: 2px dashed var(--dashc);
+    background: linear-gradient(140deg, #e9e9ed, #dcdce1);
+  }
+  /* selected category */
+  .plp .rcat--on { background: var(--tint); border-radius: 0 14px 14px 0; margin-right: 8px; }
+  .plp .rcat--on::before {
+    content: ""; position: absolute; left: 0; top: 14px; bottom: 14px;
+    width: 3.5px; border-radius: 0 3px 3px 0; background: #1f1f22;
+  }
+  .plp .rcat--on .rlabel { color: var(--ink); font-weight: 700; }
+  /* right content */
+  .plp .content { flex: 1; overflow-y: auto; scrollbar-width: none; padding: 12px 14px 110px; }
+  .plp .content::-webkit-scrollbar { display: none; }
+
+  /* filter chips */
+  .plp .filters { display: flex; gap: 8px; overflow: hidden; }
+  .plp .fchip {
+    flex: none; display: flex; align-items: center; gap: 6px;
+    border: 1.5px solid var(--hair); border-radius: 12px;
+    padding: 9px 12px; font-size: 12.5px; font-weight: 500; color: var(--ink);
+    background: var(--card);
+  }
+  .plp .fchip svg { width: 15px; height: 15px; }
+  .plp .fchip .mini { width: 20px; height: 20px; border-radius: 6px; background: var(--tint); }
+
+  /* personalized banner slot */
+  .plp .banner {
+    margin-top: 12px; height: 96px; border-radius: 16px;
+    background: linear-gradient(140deg, #ececef, #dfdfe4);
+    display: flex; flex-direction: column; justify-content: center;
+    padding: 0 16px; gap: 3px;
+  }
+  .plp .banner .b1 { font-size: 13.5px; font-weight: 700; }
+  .plp .banner .b2 { font-size: 11px; color: var(--ink-2); }
+
+  /* product grid */
+  .plp .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px 10px; margin-top: 16px; }
+  .plp .prod { position: relative; }
+  .plp .pimg {
+    height: 118px; border-radius: 14px; position: relative;
+    background: linear-gradient(140deg, #ededf0, #e0e0e5);
+    border: 1px solid var(--hair);
+  }
+  .plp .heart {
+    position: absolute; top: 8px; right: 8px; color: var(--ink-3);
+  }
+  .plp .heart svg { width: 16px; height: 16px; }
+  /* ADD lives inside the image, bottom-right — per Zepto PLP */
+  .plp .addbtn {
+    position: absolute; right: 8px; bottom: 8px;
+    background: var(--card); border: 1.5px solid var(--ink);
+    border-radius: 10px; padding: 6px 16px;
+    font-size: 12px; font-weight: 800; letter-spacing: .04em;
+    box-shadow: var(--shadow-sm);
+  }
+  .plp .pinfo { margin-top: 10px; }
+  .plp .prow { display: flex; align-items: center; gap: 6px; }
+  .plp .price {
+    background: #2b2b2e; color: #fff; font-size: 12px; font-weight: 700;
+    border-radius: 8px; padding: 3px 8px;
+  }
+  .plp .strike { font-size: 11.5px; color: var(--ink-3); text-decoration: line-through; }
+  .plp .off { font-size: 11px; font-weight: 700; color: var(--ink-2); margin-top: 4px; }
+  .plp .pname { font-size: 12.5px; font-weight: 600; line-height: 1.35; margin-top: 5px; }
+  .plp .pack { font-size: 11px; color: var(--ink-2); margin-top: 3px; }
+  .plp .rating { display: flex; align-items: center; gap: 4px; font-size: 11px; color: var(--ink-2); margin-top: 4px; }
+  .plp .rating .star { width: 11px; height: 11px; }
+
+  /* floating reward bar — our applied-reward indication */
+  .plp .reward-bar {
+    position: absolute; left: 14px; right: 14px; bottom: 34px;
+    background: #1f1f22; color: #fff;
+    border-radius: 18px; padding: 13px 16px;
+    display: flex; align-items: center; gap: 12px;
+    box-shadow: 0 10px 26px rgba(0,0,0,.25);
+  }
+  .plp .reward-bar .paw {
+    width: 38px; height: 38px; flex: none; border-radius: 50%;
+    background: rgba(255,255,255,.14);
+    display: grid; place-items: center;
+  }
+  .plp .reward-bar .paw svg { width: 19px; height: 19px; }
+  .plp .rb1 { font-size: 14px; font-weight: 700; }
+  .plp .rb2 { font-size: 11.5px; color: #c9c9ce; margin-top: 2px; }
+</style>
+</head>
+<body>
+<div class="device">
+<div class="screen plp">
+
+  <div class="statusbar">
+    <span class="time">9:41</span>
+    <span class="cluster"><i class="sig"></i><i class="wifi"></i><i class="batt"></i></span>
+  </div>
+
+  <!-- existing PLP chrome: back · title · wishlist · search -->
+  <div class="plp-head">
+    <span class="head-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg></span>
+    <span class="plp-title">Pet Care</span>
+    <span class="head-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20s-7-4.5-9-9a5 5 0 0 1 9-3 5 5 0 0 1 9 3c-2 4.5-9 9-9 9z"/></svg></span>
+    <span class="head-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg></span>
+  </div>
+
+  <div class="plp-body">
+
+    <!-- left rail: first two categories ARE the pets -->
+    <div class="rail">
+      <div class="rcat rcat--pet rcat--on">
+        <div class="tile"></div>
+        <div class="rlabel">For Meesha</div>
+      </div>
+      <div class="rcat rcat--pet">
+        <div class="tile"></div>
+        <div class="rlabel">For Mike</div>
+      </div>
+      <div class="rcat"><div class="tile"></div><div class="rlabel">Top Deals</div></div>
+      <div class="rcat"><div class="tile"></div><div class="rlabel">Large Pack</div></div>
+      <div class="rcat"><div class="tile"></div><div class="rlabel">Premium</div></div>
+      <div class="rcat"><div class="tile"></div><div class="rlabel">Treats &amp; Toys</div></div>
+      <div class="rcat"><div class="tile"></div><div class="rlabel">Grooming</div></div>
+    </div>
+
+    <!-- right: Meesha selected → cat-only shelf -->
+    <div class="content">
+
+      <div class="filters">
+        <span class="fchip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 7h16M7 12h10M10 17h4"/></svg></span>
+        <span class="fchip">Type
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></span>
+        <span class="fchip">Brand
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></span>
+        <span class="fchip"><span class="mini"></span>Wet Food</span>
+      </div>
+
+      <div class="banner">
+        <div class="b1">Picked for Meesha</div>
+        <div class="b2">Indie cats do best on wet-first diets — brand promo slot</div>
+      </div>
+
+      <div class="grid">
+        <div class="prod">
+          <div class="pimg">
+            <span class="heart"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20s-7-4.5-9-9a5 5 0 0 1 9-3 5 5 0 0 1 9 3c-2 4.5-9 9-9 9z"/></svg></span>
+            <span class="addbtn">ADD</span>
+          </div>
+          <div class="pinfo">
+            <div class="prow"><span class="price">₹403</span><span class="strike">₹450</span></div>
+            <div class="off">₹47 OFF</div>
+            <div class="pname">Adult Ocean Fish Dry Cat Food</div>
+            <div class="pack">1 pack (1.2 kg)</div>
+            <div class="rating"><svg class="star" viewBox="0 0 24 24" fill="#8e8e94"><path d="M12 2l2.9 6.3 6.9.8-5.1 4.7 1.4 6.8L12 17.3 5.9 20.6l1.4-6.8L2.2 9.1l6.9-.8z"/></svg>4.8 (5k)</div>
+          </div>
+        </div>
+
+        <div class="prod">
+          <div class="pimg">
+            <span class="heart"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20s-7-4.5-9-9a5 5 0 0 1 9-3 5 5 0 0 1 9 3c-2 4.5-9 9-9 9z"/></svg></span>
+            <span class="addbtn">ADD</span>
+          </div>
+          <div class="pinfo">
+            <div class="prow"><span class="price">₹50</span></div>
+            <div class="pname">Skipjack &amp; Salmon Wet Cat Food</div>
+            <div class="pack">1 pack (35 g)</div>
+            <div class="rating"><svg class="star" viewBox="0 0 24 24" fill="#8e8e94"><path d="M12 2l2.9 6.3 6.9.8-5.1 4.7 1.4 6.8L12 17.3 5.9 20.6l1.4-6.8L2.2 9.1l6.9-.8z"/></svg>4.9 (2k)</div>
+          </div>
+        </div>
+
+        <div class="prod">
+          <div class="pimg">
+            <span class="heart"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20s-7-4.5-9-9a5 5 0 0 1 9-3 5 5 0 0 1 9 3c-2 4.5-9 9-9 9z"/></svg></span>
+            <span class="addbtn">ADD</span>
+          </div>
+          <div class="pinfo">
+            <div class="prow"><span class="price">₹349</span><span class="strike">₹399</span></div>
+            <div class="off">₹50 OFF</div>
+            <div class="pname">Clumping Cat Litter, Lavender</div>
+            <div class="pack">1 pack (5 L)</div>
+            <div class="rating"><svg class="star" viewBox="0 0 24 24" fill="#8e8e94"><path d="M12 2l2.9 6.3 6.9.8-5.1 4.7 1.4 6.8L12 17.3 5.9 20.6l1.4-6.8L2.2 9.1l6.9-.8z"/></svg>4.7 (3k)</div>
+          </div>
+        </div>
+
+        <div class="prod">
+          <div class="pimg">
+            <span class="heart"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20s-7-4.5-9-9a5 5 0 0 1 9-3 5 5 0 0 1 9 3c-2 4.5-9 9-9 9z"/></svg></span>
+            <span class="addbtn">ADD</span>
+          </div>
+          <div class="pinfo">
+            <div class="prow"><span class="price">₹199</span></div>
+            <div class="pname">Creamy Cat Treats, Chicken</div>
+            <div class="pack">Pack of 3</div>
+            <div class="rating"><svg class="star" viewBox="0 0 24 24" fill="#8e8e94"><path d="M12 2l2.9 6.3 6.9.8-5.1 4.7 1.4 6.8L12 17.3 5.9 20.6l1.4-6.8L2.2 9.1l6.9-.8z"/></svg>4.6 (1k)</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- applied reward: Zepto's "Unlock free delivery" bar, flipped to earned state -->
+  <div class="reward-bar">
+    <span class="paw"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l4 4L19 6"/></svg></span>
+    <span>
+      <span class="rb1" style="display:block">Free delivery is on</span>
+      <span class="rb2" style="display:block">Every pet care order — unlocked by Meesha &amp; Mike</span>
+    </span>
+  </div>
+
+  <div class="home-indicator"></div>
+
+</div>
+</div>
+</body>
+</html>

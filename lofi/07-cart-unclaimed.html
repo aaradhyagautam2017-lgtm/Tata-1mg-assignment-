@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>07 · Cart — pet item, reward unclaimed</title>
+<link rel="stylesheet" href="../shared/tokens-lofi.css">
+<link rel="stylesheet" href="../shared/device.css">
+<style>
+  /* ---------------------------------------------------------
+     07 — Zepto cart, elevated greyscale. Scoped to .cart.
+     State: a pet care item is in the cart, but no pet profile
+     exists → campaign nudge surfaces in Coupons & offers.
+     --------------------------------------------------------- */
+  .cart {
+    --bg:      #f2f2f4;
+    --card:    #ffffff;
+    --ink:     #1a1a1c;
+    --ink-2:   #6a6a70;
+    --ink-3:   #a2a2a8;
+    --hair:    #ececef;
+    --tint:    #f4f4f6;
+    --dashc:   #b0b0b6;
+    --shadow-sm: 0 4px 14px rgba(20,20,28,.05);
+    background: var(--bg);
+    color: var(--ink);
+  }
+  .cart .statusbar .time { color: var(--ink); }
+  .cart .statusbar .cluster i { background: #202024; }
+
+  /* ---------- header ---------- */
+  .cart .head {
+    display: flex; align-items: center; gap: 12px;
+    padding: 4px 16px 10px;
+  }
+  .cart .cc {
+    width: 40px; height: 40px; flex: none; border-radius: 50%;
+    background: var(--card); box-shadow: var(--shadow-sm);
+    display: grid; place-items: center;
+  }
+  .cart .cc svg { width: 18px; height: 18px; }
+  .cart .addr { flex: 1; min-width: 0; }
+  .cart .addr .a1 { font-size: 15.5px; font-weight: 700; }
+  .cart .addr .a2 { font-size: 11.5px; color: var(--ink-2); margin-top: 1px;
+                    white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+  /* saved strip */
+  .cart .saved {
+    background: #e3e3e7; text-align: center;
+    font-size: 12.5px; padding: 9px 16px; color: var(--ink-2);
+  }
+  .cart .saved b { color: var(--ink); }
+
+  .cart .body { flex: 1; overflow-y: auto; scrollbar-width: none; padding: 12px 14px 96px; }
+  .cart .body::-webkit-scrollbar { display: none; }
+
+  .cart .panel {
+    background: var(--card); border-radius: 18px;
+    box-shadow: var(--shadow-sm); padding: 16px; margin-bottom: 12px;
+  }
+  .cart .panel-h { font-size: 16px; font-weight: 700; letter-spacing: -.2px; }
+
+  /* ---------- coupon rows ---------- */
+  .cart .crow { display: flex; align-items: center; gap: 12px; margin-top: 14px; }
+  .cart .cico {
+    width: 44px; height: 44px; flex: none; border-radius: 12px;
+    background: var(--tint); display: grid; place-items: center; color: var(--ink);
+  }
+  .cart .cico svg { width: 21px; height: 21px; }
+  .cart .ctxt { flex: 1; min-width: 0; }
+  .cart .ct1 { font-size: 13.5px; font-weight: 600; line-height: 1.3; }
+  .cart .ct2 { font-size: 12px; color: var(--ink-2); margin-top: 2px; line-height: 1.35; }
+  .cart .locked {
+    flex: none; font-size: 12.5px; font-weight: 600; color: var(--ink-3);
+    border: 1.5px solid var(--hair); border-radius: 10px; padding: 8px 14px;
+  }
+  .cart .cta-sm {
+    flex: none; font-size: 12.5px; font-weight: 700; color: #fff;
+    background: #1f1f22; border-radius: 10px; padding: 9px 16px;
+  }
+  .cart .viewall { font-size: 12.5px; font-weight: 600; color: var(--ink-2); margin-top: 14px; }
+  .cart .sep { border-top: 1.5px dashed var(--hair); margin-top: 14px; }
+
+  /* our inserted row — dashed per lo-fi grammar */
+  .cart .crow--pet {
+    border: 2px dashed var(--dashc); border-radius: 14px;
+    padding: 12px; margin: 14px -4px 0;
+  }
+  .cart .crow--pet .cico { background: linear-gradient(140deg, #e9e9ed, #dcdce1); }
+
+  .cart .annot {
+    font-size: 10.5px; line-height: 1.5; color: var(--ink-3);
+    border-left: 2px solid #d7d7dc; padding: 2px 0 2px 8px;
+    font-style: italic; margin: 0 4px 12px;
+  }
+
+  /* ---------- delivery + item ---------- */
+  .cart .drow { display: flex; align-items: center; gap: 12px; }
+  .cart .dtxt { flex: 1; }
+  .cart .dt1 { font-size: 15.5px; font-weight: 700; }
+  .cart .dt2 { font-size: 12px; color: var(--ink-2); margin-top: 1px; }
+  .cart .schedule {
+    font-size: 12.5px; font-weight: 600; color: var(--ink-2);
+    border: 1.5px solid var(--hair); border-radius: 10px; padding: 8px 13px;
+  }
+  .cart .item { display: flex; align-items: center; gap: 12px; margin-top: 16px; }
+  .cart .iimg {
+    width: 56px; height: 56px; flex: none; border-radius: 12px;
+    background: linear-gradient(140deg, #ededf0, #e0e0e5);
+    border: 1px solid var(--hair);
+  }
+  .cart .itxt { flex: 1; min-width: 0; }
+  .cart .it1 { font-size: 13px; font-weight: 600; line-height: 1.3; }
+  .cart .it2 { font-size: 11.5px; color: var(--ink-2); margin-top: 2px; }
+  .cart .iend { display: flex; flex-direction: column; align-items: flex-end; gap: 6px; }
+  .cart .stepper {
+    display: flex; align-items: center; gap: 12px;
+    border: 1.5px solid var(--ink); border-radius: 10px; padding: 5px 10px;
+    font-size: 13px; font-weight: 800;
+  }
+  .cart .iprice { font-size: 13.5px; font-weight: 700; }
+  .cart .addmore { text-align: center; font-size: 13px; color: var(--ink-2); margin-top: 16px; }
+  .cart .addmore b { color: var(--ink); }
+
+  /* ---------- free-delivery ladder (existing Zepto furniture) ---------- */
+  .cart .ladder { display: flex; justify-content: space-between; margin-top: 16px; }
+  .cart .lstep { display: flex; flex-direction: column; align-items: center; gap: 5px; width: 72px; text-align: center; }
+  .cart .lnode { width: 30px; height: 30px; border-radius: 50%; background: var(--tint);
+                 display: grid; place-items: center; color: var(--ink-2); }
+  .cart .lnode svg { width: 15px; height: 15px; }
+  .cart .lstep .l1 { font-size: 11px; font-weight: 700; }
+  .cart .lstep .l2 { font-size: 10px; color: var(--ink-3); }
+
+  /* ---------- bag + footer ---------- */
+  .cart .bagrow {
+    background: var(--card); border-radius: 14px; box-shadow: var(--shadow-sm);
+    display: flex; align-items: center; gap: 10px;
+    padding: 13px 16px; font-size: 13.5px; font-weight: 600;
+  }
+  .cart .cb { width: 20px; height: 20px; border: 1.5px solid var(--ink-3); border-radius: 6px; }
+
+  .cart .paybar {
+    position: absolute; left: 0; right: 0; bottom: 24px;
+    background: var(--card); border-top: 1px solid var(--hair);
+    padding: 12px 16px; display: flex; align-items: center; gap: 10px;
+  }
+  .cart .topay .p1 { font-size: 11.5px; color: var(--ink-2); }
+  .cart .topay .p2 { font-size: 18px; font-weight: 800; }
+  .cart .instant {
+    flex: 1; border: 1.5px solid var(--hair); border-radius: 14px;
+    padding: 9px 12px; margin-left: 8px;
+  }
+  .cart .instant .i1 { font-size: 13px; font-weight: 700; }
+  .cart .instant .i2 { font-size: 10.5px; color: var(--ink-2); }
+  .cart .paynow {
+    flex: 1; background: #1f1f22; color: #fff; border: none; border-radius: 14px;
+    font-family: inherit; font-size: 14.5px; font-weight: 700; padding: 15px 0;
+  }
+</style>
+</head>
+<body>
+<div class="device">
+<div class="screen cart">
+
+  <div class="statusbar">
+    <span class="time">9:41</span>
+    <span class="cluster"><i class="sig"></i><i class="wifi"></i><i class="batt"></i></span>
+  </div>
+
+  <div class="head">
+    <div class="cc"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg></div>
+    <div class="addr">
+      <div class="a1">Home ▾</div>
+      <div class="a2">Flat 10, first floor, HSR Layout, Bengaluru…</div>
+    </div>
+    <div class="cc"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20s-7-4.5-9-9a5 5 0 0 1 9-3 5 5 0 0 1 9 3c-2 4.5-9 9-9 9z"/></svg></div>
+  </div>
+
+  <div class="saved">Yay! You <b>saved ₹47</b> on this order</div>
+
+  <div class="body">
+
+    <!-- coupons & offers — the nudge lives here -->
+    <div class="panel">
+      <div class="panel-h">Coupons &amp; offers</div>
+
+      <!-- OUR ELEMENT · pet care item in cart + no pet profile → claimable reward -->
+      <div class="crow crow--pet">
+        <div class="cico">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="14.5" r="4.2"/><circle cx="6.2" cy="9.2" r="1.9"/><circle cx="10" cy="6.2" r="1.9"/><circle cx="14" cy="6.2" r="1.9"/><circle cx="17.8" cy="9.2" r="1.9"/></svg>
+        </div>
+        <div class="ctxt">
+          <div class="ct1">Shopping for a pet? Meet free delivery</div>
+          <div class="ct2">One photo of them unlocks it — plus up to ₹150 off</div>
+        </div>
+        <span class="cta-sm">Unlock</span>
+      </div>
+
+      <div class="sep"></div>
+
+      <div class="crow">
+        <div class="cico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l2 2h3a1 1 0 0 1 1 1v3l2 2-2 2v3a1 1 0 0 1-1 1h-3l-2 2-2-2H7a1 1 0 0 1-1-1v-3l-2-2 2-2V6a1 1 0 0 1 1-1h3z"/><path d="M9.5 12.5l2 2 3.5-4"/></svg></div>
+        <div class="ctxt">
+          <div class="ct1">Save ₹50 with Z-RAPIDOFF50</div>
+          <div class="ct2">Shop for ₹501 more to apply</div>
+        </div>
+        <span class="locked">Locked</span>
+      </div>
+
+      <div class="crow">
+        <div class="cico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="18" height="13" rx="2.5"/><path d="M3 10h18"/></svg></div>
+        <div class="ctxt">
+          <div class="ct1">Get up to ₹50 cashback on Pay</div>
+          <div class="ct2">Shop for ₹97 more to apply</div>
+        </div>
+        <span class="locked">Locked</span>
+      </div>
+
+      <div class="viewall">View all coupons ›</div>
+    </div>
+
+    <p class="annot">Appears only when the cart holds a pet care item and no pet profile exists yet. One tap opens the upload flow (03a); the cart is waiting when it’s done.</p>
+
+    <!-- delivery + the pet item that triggered the nudge -->
+    <div class="panel">
+      <div class="drow">
+        <div class="cico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg></div>
+        <div class="dtxt">
+          <div class="dt1">Delivering in 7 mins</div>
+          <div class="dt2">1 item</div>
+        </div>
+        <span class="schedule">Schedule</span>
+      </div>
+
+      <div class="item">
+        <div class="iimg"></div>
+        <div class="itxt">
+          <div class="it1">Adult Ocean Fish Dry Cat Food</div>
+          <div class="it2">1 pack (1.2 kg)</div>
+        </div>
+        <div class="iend">
+          <span class="stepper">−&nbsp;&nbsp;1&nbsp;&nbsp;+</span>
+          <span class="iprice">₹403</span>
+        </div>
+      </div>
+
+      <div class="addmore">Forgot something? <b>Add More Items</b></div>
+    </div>
+
+    <!-- existing free-delivery ladder — unchanged Zepto furniture -->
+    <div class="panel">
+      <div class="panel-h" style="font-size:14.5px">Shop ₹97 more, unlock free delivery</div>
+      <div class="ladder">
+        <div class="lstep">
+          <div class="lnode"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l4 4L19 6"/></svg></div>
+          <div class="l1">Free Delivery</div><div class="l2">Save ₹30</div>
+        </div>
+        <div class="lstep"><div class="lnode"></div><div class="l1">₹50 OFF</div><div class="l2">Coupon</div></div>
+        <div class="lstep"><div class="lnode"></div><div class="l1">₹100 OFF</div><div class="l2">Coupon</div></div>
+        <div class="lstep"><div class="lnode"></div><div class="l1">₹150 OFF</div><div class="l2">Coupon</div></div>
+      </div>
+    </div>
+
+    <div class="bagrow"><span class="cb"></span> I don’t need a bag</div>
+
+  </div>
+
+  <div class="paybar">
+    <div class="topay">
+      <div class="p1">To Pay</div>
+      <div class="p2">₹433</div>
+    </div>
+    <div class="instant">
+      <div class="i1">⚡ Instant Order</div>
+      <div class="i2">Pay while we deliver</div>
+    </div>
+    <button class="paynow">Pay Now</button>
+  </div>
+  <div class="home-indicator"></div>
+
+</div>
+</div>
+</body>
+</html>

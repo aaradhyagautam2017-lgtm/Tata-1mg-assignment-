@@ -1,0 +1,124 @@
+/* ============================================================
+   tokens-hifi.css — Phase 2 · Zepto visual system
+   Zepto · Meet your pet, unlock rewards
+   Sourced from live app screenshots + zeptonow.com bundle.
+   See zepto-language.md for the full extraction & rationale.
+   ============================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;800&family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,600;1,9..144,500;1,9..144,600&display=swap');
+
+:root {
+  /* ---------- type ---------- */
+  --font-ui:      "Figtree", -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-display: "Fraunces", Georgia, serif;
+
+  /* ---------- brand: purple (identity & selection) ---------- */
+  --purple:       #9A16CA;
+  --purple-deep:  #7A14AC;
+  --purple-tint:  #F3EBFF;
+  --purple-tint-2:#E9D9FB;
+
+  /* ---------- commerce pink (every buy action) ---------- */
+  --pink:         #FF2D78;
+  --pink-press:   #DB2767;
+  --pink-tint:    #FFE9F0;
+
+  /* ---------- money green ---------- */
+  --green:        #329537;
+  --green-tint:   #DFF3E7;
+
+  /* ---------- amber: unlock conditions ---------- */
+  --amber:        #E58A1F;
+  --amber-tint:   #FEF5E9;
+
+  /* ---------- info blue: neutral tags ---------- */
+  --blue:         #2364E5;
+  --blue-tint:    #EAF1FF;
+
+  /* ---------- utility dark: floating bars only ---------- */
+  --plum:         #2B1E35;
+
+  /* ---------- neutrals ---------- */
+  --ink:          #262A33;
+  --ink-max:      #101418;
+  --grey-1:       #586274;   /* secondary text */
+  --grey-2:       #667085;   /* tertiary text */
+  --grey-3:       #757C8D;   /* metadata */
+  --hairline:     #ECEFF3;
+  --page:         #F3F5F7;   /* cart / list page bg */
+  --page-alt:     #FAFAFB;
+  --card:         #FFFFFF;
+
+  /* ---------- radii ---------- */
+  --r-panel:  18px;
+  --r-tile:   12px;
+  --r-btn:    14px;
+  --r-pill:   999px;
+  --r-field:  12px;
+  --r-bar:    22px;
+
+  /* ---------- shadow ---------- */
+  --shadow-sm: 0 4px 14px rgba(20,20,28,.06);
+  --shadow-md: 0 10px 28px rgba(20,20,28,.09);
+  --shadow-bar: 0 10px 26px rgba(0,0,0,.22);
+
+  font-family: var(--font-ui);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+a { text-decoration: none; color: inherit; }
+html, body { height: 100%; }
+body {
+  font-family: var(--font-ui);
+  color: var(--ink);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ---------- screen scaffold (same contract as lo-fi) ---------- */
+.screen {
+  width: 390px;
+  height: 844px;
+  background: var(--card);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  position: relative;
+}
+.scroll {
+  flex: 1;
+  overflow-y: auto;
+  scrollbar-width: none;
+}
+.scroll::-webkit-scrollbar { display: none; }
+
+/* ---------- shared buttons ---------- */
+.btn {
+  display: block;
+  width: 100%;
+  padding: 15px;
+  border: none;
+  border-radius: var(--r-btn);
+  font-family: var(--font-ui);
+  font-size: 15px;
+  font-weight: 700;
+  text-align: center;
+  cursor: pointer;
+}
+.btn--pink { background: var(--pink); color: #fff; }
+.btn--pink:active { background: var(--pink-press); }
+.btn--pink.is-disabled { background: #F6C4D4; color: #fff; }
+.btn--ghost {
+  background: none; color: var(--grey-1); font-weight: 600;
+  border: none; padding: 12px; font-size: 14px;
+}
+
+/* ---------- pill / chip primitives ---------- */
+.chip {
+  display: inline-flex; align-items: center; gap: 6px;
+  border: 1.5px solid var(--hairline);
+  border-radius: var(--r-btn);
+  padding: 9px 13px;
+  font-size: 12.5px; font-weight: 600; color: var(--ink);
+  background: var(--card);
+}
+.chip.is-active { background: var(--ink); color: #fff; border-color: var(--ink); }

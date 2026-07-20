@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>06 · Pet Care PLP — personalized categories (hi-fi)</title>
+<link rel="stylesheet" href="../shared/tokens-hifi.css">
+<link rel="stylesheet" href="../shared/device.css">
+<style>
+  .plp2 { background: var(--card); }
+  .plp2 .statusbar .time { color: var(--ink-max); }
+  .plp2 .statusbar .cluster i { background: var(--ink-max); }
+
+  .plp2 .plp-head { display: flex; align-items: center; gap: 12px; padding: 6px 18px 12px; }
+  .plp2 .plp-head svg { width: 21px; height: 21px; }
+  .plp2 .plp-title { font-size: 18px; font-weight: 800; flex: 1; }
+  .plp2 .head-ic { color: var(--ink); display: grid; place-items: center; }
+  .plp2 .head-ic + .head-ic { margin-left: 6px; }
+
+  .plp2 .plp-body { flex: 1; display: flex; overflow: hidden; border-top: 1px solid var(--hairline); }
+
+  .plp2 .rail { width: 92px; flex: none; overflow-y: auto; scrollbar-width: none; padding: 10px 0 90px; }
+  .plp2 .rail::-webkit-scrollbar { display: none; }
+  .plp2 .rcat { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 10px 6px; position: relative; }
+  .plp2 .rcat .tile { width: 56px; height: 56px; border-radius: 16px; background: var(--page-alt); }
+  .plp2 .rcat .rlabel { font-size: 10px; font-weight: 600; color: var(--grey-2); text-align: center; line-height: 1.25; }
+
+  .plp2 .rcat--pet .tile {
+    border: 2px dashed var(--purple);
+    background: linear-gradient(140deg, #F3E8FF, #E4C9FA);
+    display: grid; place-items: center; color: var(--purple);
+  }
+  .plp2 .rcat--pet .tile svg { width: 24px; height: 24px; }
+
+  .plp2 .rcat--on { background: var(--purple-tint); border-radius: 0 14px 14px 0; margin-right: 8px; }
+  .plp2 .rcat--on::before {
+    content: ""; position: absolute; left: 0; top: 14px; bottom: 14px;
+    width: 3.5px; border-radius: 0 3px 3px 0; background: var(--purple);
+  }
+  .plp2 .rcat--on .rlabel { color: var(--purple-deep); font-weight: 800; }
+
+  .plp2 .content { flex: 1; overflow-y: auto; scrollbar-width: none; padding: 12px 14px 110px; }
+  .plp2 .content::-webkit-scrollbar { display: none; }
+
+  .plp2 .filters { display: flex; gap: 8px; overflow: hidden; }
+  .plp2 .fchip {
+    flex: none; display: flex; align-items: center; gap: 6px;
+    border: 1.5px solid var(--hairline); border-radius: 12px;
+    padding: 9px 12px; font-size: 12px; font-weight: 700; color: var(--ink);
+    background: var(--card);
+  }
+  .plp2 .fchip svg { width: 14px; height: 14px; }
+  .plp2 .fchip .mini { width: 20px; height: 20px; border-radius: 6px; background: var(--purple-tint); }
+
+  .plp2 .banner {
+    margin-top: 12px; height: 92px; border-radius: 16px;
+    background: linear-gradient(135deg, #F3E8FF, #E4C9FA);
+    display: flex; flex-direction: column; justify-content: center;
+    padding: 0 16px; gap: 3px; position: relative; overflow: hidden;
+  }
+  .plp2 .banner::after {
+    content: ""; position: absolute; right: -20px; top: -20px; width: 100px; height: 100px;
+    border-radius: 50%; background: rgba(255,255,255,.4);
+  }
+  .plp2 .banner .b1 { font-size: 13.5px; font-weight: 800; color: var(--purple-deep); }
+  .plp2 .banner .b2 { font-size: 11px; color: var(--grey-1); }
+
+  .plp2 .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px 10px; margin-top: 16px; }
+  .plp2 .prod { position: relative; }
+  .plp2 .pimg {
+    height: 118px; border-radius: 14px; position: relative;
+    background: linear-gradient(140deg, #F6F6F8, #ECECF0);
+    border: 1px solid var(--hairline);
+  }
+  .plp2 .heart { position: absolute; top: 8px; right: 8px; color: #C7C2CE; }
+  .plp2 .heart svg { width: 16px; height: 16px; }
+  .plp2 .addbtn {
+    position: absolute; right: 8px; bottom: 8px;
+    background: var(--card); border: 1.5px solid var(--pink);
+    border-radius: 9px; padding: 6px 15px;
+    font-size: 11.5px; font-weight: 800; letter-spacing: .03em; color: var(--pink);
+    box-shadow: var(--shadow-sm);
+  }
+  .plp2 .pinfo { margin-top: 10px; }
+  .plp2 .prow { display: flex; align-items: center; gap: 6px; }
+  .plp2 .price { background: var(--green); color: #fff; font-size: 12px; font-weight: 800; border-radius: 8px; padding: 3px 8px; }
+  .plp2 .strike { font-size: 11px; color: var(--grey-3); text-decoration: line-through; }
+  .plp2 .off { font-size: 10.5px; font-weight: 800; color: var(--green); margin-top: 4px; }
+  .plp2 .pname { font-size: 12.5px; font-weight: 700; line-height: 1.35; margin-top: 5px; }
+  .plp2 .pack { font-size: 10.5px; color: var(--grey-2); margin-top: 3px; }
+  .plp2 .rating { display: flex; align-items: center; gap: 4px; font-size: 10.5px; color: var(--grey-2); margin-top: 4px; }
+  .plp2 .rating .star { width: 11px; height: 11px; }
+
+  .plp2 .reward-bar {
+    position: absolute; left: 14px; right: 14px; bottom: 34px;
+    background: var(--plum); color: #fff;
+    border-radius: 18px; padding: 13px 16px;
+    display: flex; align-items: center; gap: 12px;
+    box-shadow: var(--shadow-bar);
+  }
+  .plp2 .reward-bar .paw {
+    width: 38px; height: 38px; flex: none; border-radius: 50%;
+    background: rgba(255,255,255,.14); display: grid; place-items: center;
+  }
+  .plp2 .reward-bar .paw svg { width: 18px; height: 18px; color: #C99BF0; }
+  .plp2 .rb1 { font-size: 13.5px; font-weight: 800; }
+  .plp2 .rb2 { font-size: 11px; color: #C9BFD1; margin-top: 2px; }
+</style>
+</head>
+<body>
+<div class="device">
+<div class="screen plp2">
+
+  <div class="statusbar">
+    <span class="time">9:41</span>
+    <span class="cluster"><i class="sig"></i><i class="wifi"></i><i class="batt"></i></span>
+  </div>
+
+  <div class="plp-head">
+    <a class="head-ic" href="01-entry.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg></a>
+    <span class="plp-title">Pet Care</span>
+    <span class="head-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20s-7-4.5-9-9a5 5 0 0 1 9-3 5 5 0 0 1 9 3c-2 4.5-9 9-9 9z"/></svg></span>
+    <span class="head-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg></span>
+  </div>
+
+  <div class="plp-body">
+
+    <div class="rail">
+      <div class="rcat rcat--pet rcat--on">
+        <div class="tile"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="8" cy="8" r="2"/><circle cx="16" cy="8" r="2"/><circle cx="5.5" cy="13" r="1.8"/><circle cx="18.5" cy="13" r="1.8"/><path d="M12 12c-3 0-5.5 2.2-5.5 4.8 0 1.7 1.4 2.7 3 2.4 1-.2 1.6-.7 2.5-.7s1.5.5 2.5.7c1.6.3 3-.7 3-2.4C17.5 14.2 15 12 12 12z"/></svg></div>
+        <div class="rlabel">For Meesha</div>
+      </div>
+      <div class="rcat rcat--pet">
+        <div class="tile"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="8" cy="8" r="2"/><circle cx="16" cy="8" r="2"/><circle cx="5.5" cy="13" r="1.8"/><circle cx="18.5" cy="13" r="1.8"/><path d="M12 12c-3 0-5.5 2.2-5.5 4.8 0 1.7 1.4 2.7 3 2.4 1-.2 1.6-.7 2.5-.7s1.5.5 2.5.7c1.6.3 3-.7 3-2.4C17.5 14.2 15 12 12 12z"/></svg></div>
+        <div class="rlabel">For Mike</div>
+      </div>
+      <div class="rcat"><div class="tile"></div><div class="rlabel">Top Deals</div></div>
+      <div class="rcat"><div class="tile"></div><div class="rlabel">Large Pack</div></div>
+      <div class="rcat"><div class="tile"></div><div class="rlabel">Premium</div></div>
+      <div class="rcat"><div class="tile"></div><div class="rlabel">Treats &amp; Toys</div></div>
+      <div class="rcat"><div class="tile"></div><div class="rlabel">Grooming</div></div>
+    </div>
+
+    <div class="content">
+
+      <div class="filters">
+        <span class="fchip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 7h16M7 12h10M10 17h4"/></svg></span>
+        <span class="fchip">Type
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></span>
+        <span class="fchip">Brand
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></span>
+        <span class="fchip"><span class="mini"></span>Wet Food</span>
+      </div>
+
+      <div class="banner">
+        <div class="b1">Picked for Meesha</div>
+        <div class="b2">Indie cats do best on wet-first diets</div>
+      </div>
+
+      <div class="grid">
+        <div class="prod">
+          <div class="pimg">
+            <span class="heart"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20s-7-4.5-9-9a5 5 0 0 1 9-3 5 5 0 0 1 9 3c-2 4.5-9 9-9 9z"/></svg></span>
+            <span class="addbtn">ADD</span>
+          </div>
+          <div class="pinfo">
+            <div class="prow"><span class="price">₹403</span><span class="strike">₹450</span></div>
+            <div class="off">₹47 OFF</div>
+            <div class="pname">Adult Ocean Fish Dry Cat Food</div>
+            <div class="pack">1 pack (1.2 kg)</div>
+            <div class="rating"><svg class="star" viewBox="0 0 24 24" fill="#E58A1F"><path d="M12 2l2.9 6.3 6.9.8-5.1 4.7 1.4 6.8L12 17.3 5.9 20.6l1.4-6.8L2.2 9.1l6.9-.8z"/></svg>4.8 (5k)</div>
+          </div>
+        </div>
+
+        <div class="prod">
+          <div class="pimg">
+            <span class="heart"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20s-7-4.5-9-9a5 5 0 0 1 9-3 5 5 0 0 1 9 3c-2 4.5-9 9-9 9z"/></svg></span>
+            <span class="addbtn">ADD</span>
+          </div>
+          <div class="pinfo">
+            <div class="prow"><span class="price">₹50</span></div>
+            <div class="pname">Skipjack &amp; Salmon Wet Cat Food</div>
+            <div class="pack">1 pack (35 g)</div>
+            <div class="rating"><svg class="star" viewBox="0 0 24 24" fill="#E58A1F"><path d="M12 2l2.9 6.3 6.9.8-5.1 4.7 1.4 6.8L12 17.3 5.9 20.6l1.4-6.8L2.2 9.1l6.9-.8z"/></svg>4.9 (2k)</div>
+          </div>
+        </div>
+
+        <div class="prod">
+          <div class="pimg">
+            <span class="heart"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20s-7-4.5-9-9a5 5 0 0 1 9-3 5 5 0 0 1 9 3c-2 4.5-9 9-9 9z"/></svg></span>
+            <span class="addbtn">ADD</span>
+          </div>
+          <div class="pinfo">
+            <div class="prow"><span class="price">₹349</span><span class="strike">₹399</span></div>
+            <div class="off">₹50 OFF</div>
+            <div class="pname">Clumping Cat Litter, Lavender</div>
+            <div class="pack">1 pack (5 L)</div>
+            <div class="rating"><svg class="star" viewBox="0 0 24 24" fill="#E58A1F"><path d="M12 2l2.9 6.3 6.9.8-5.1 4.7 1.4 6.8L12 17.3 5.9 20.6l1.4-6.8L2.2 9.1l6.9-.8z"/></svg>4.7 (3k)</div>
+          </div>
+        </div>
+
+        <div class="prod">
+          <div class="pimg">
+            <span class="heart"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20s-7-4.5-9-9a5 5 0 0 1 9-3 5 5 0 0 1 9 3c-2 4.5-9 9-9 9z"/></svg></span>
+            <span class="addbtn">ADD</span>
+          </div>
+          <div class="pinfo">
+            <div class="prow"><span class="price">₹199</span></div>
+            <div class="pname">Creamy Cat Treats, Chicken</div>
+            <div class="pack">Pack of 3</div>
+            <div class="rating"><svg class="star" viewBox="0 0 24 24" fill="#E58A1F"><path d="M12 2l2.9 6.3 6.9.8-5.1 4.7 1.4 6.8L12 17.3 5.9 20.6l1.4-6.8L2.2 9.1l6.9-.8z"/></svg>4.6 (1k)</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="reward-bar">
+    <span class="paw"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l4 4L19 6"/></svg></span>
+    <span>
+      <span class="rb1" style="display:block">Free delivery is on</span>
+      <span class="rb2" style="display:block">Every pet care order — unlocked by Meesha &amp; Mike</span>
+    </span>
+  </div>
+
+  <div class="home-indicator"></div>
+
+</div>
+</div>
+</body>
+</html>

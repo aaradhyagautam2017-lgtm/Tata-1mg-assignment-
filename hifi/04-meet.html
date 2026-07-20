@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>04 · Meet your pets — the beat (hi-fi)</title>
+<link rel="stylesheet" href="../shared/tokens-hifi.css">
+<link rel="stylesheet" href="../shared/device.css">
+<style>
+  .s04 {
+    background: linear-gradient(165deg, #F8F0FF 0%, #EFDDFC 45%, #F6E9FF 100%);
+  }
+  .s04 .statusbar .time { color: var(--ink-max); }
+  .s04 .statusbar .cluster i { background: var(--ink-max); }
+
+  .s04 .stage {
+    flex: 1; display: flex; flex-direction: column;
+    align-items: center; justify-content: center; padding: 0 20px;
+    position: relative;
+  }
+  .s04 .blob { position: absolute; border-radius: 50%; opacity: .5; }
+
+  .s04 .eyebrow {
+    font-size: 11px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase;
+    color: var(--purple-deep); margin-bottom: 20px;
+  }
+
+  .s04 .deck { position: relative; width: 280px; z-index: 1; }
+  .s04 .behind {
+    position: absolute; inset: 0;
+    background: linear-gradient(140deg,#fff,#F3E8FF);
+    border: 1px solid #EDE0FB;
+    border-radius: 26px;
+    transform: rotate(5deg) translateX(12px) translateY(4px);
+    box-shadow: var(--shadow-sm);
+  }
+  .s04 .meet-card {
+    position: relative;
+    background: var(--card);
+    border-radius: 26px;
+    padding: 16px 16px 24px;
+    box-shadow: var(--shadow-md);
+  }
+  .s04 .meet-card .photo {
+    height: 232px; border-radius: 18px;
+    background: linear-gradient(150deg, #EADCFB, #D8BFF2);
+    display: grid; place-items: center;
+  }
+  .s04 .meet-card .photo svg { width: 62px; height: 62px; color: rgba(154,22,202,.5); }
+  .s04 .meet-card .name {
+    font-family: var(--font-display); font-weight: 600; font-size: 25px;
+    margin-top: 16px; text-align: center; color: var(--ink-max);
+  }
+  .s04 .meet-card .breed {
+    font-size: 12.5px; color: var(--purple-deep); font-weight: 700;
+    text-align: center; margin-top: 3px;
+    background: var(--purple-tint); display: inline-block; padding: 3px 10px;
+    border-radius: 8px; margin-left: 50%; transform: translateX(-50%);
+  }
+  .s04 .meet-card .fact {
+    font-size: 14px; line-height: 1.55; color: var(--grey-1);
+    text-align: center; margin-top: 14px; padding: 0 6px;
+  }
+
+  .s04 .dots { display: flex; gap: 6px; justify-content: center; margin-top: 24px; }
+  .s04 .dots i { width: 6px; height: 6px; border-radius: 50%; background: #DCC3F2; display: block; }
+  .s04 .dots i.on { background: var(--purple); width: 20px; border-radius: 4px; }
+
+  .s04 .tap-hint { text-align: center; font-size: 12px; color: var(--grey-2); padding-bottom: 10px; font-weight: 600; }
+
+  .s04 .tap-overlay { position: absolute; inset: 0; z-index: 2; }
+</style>
+</head>
+<body>
+<div class="device">
+<div class="screen s04">
+
+  <a class="tap-overlay" href="05-reveal.html" aria-label="Continue"></a>
+
+  <div class="statusbar">
+    <span class="time">9:41</span>
+    <span class="cluster"><i class="sig"></i><i class="wifi"></i><i class="batt"></i></span>
+  </div>
+
+  <div class="stage">
+    <div class="blob" style="width:200px;height:200px;background:#E9CBFF;left:-60px;top:60px"></div>
+    <div class="blob" style="width:140px;height:140px;background:#FFD7E6;right:-40px;bottom:80px"></div>
+
+    <div class="eyebrow">Meet your pets</div>
+
+    <div class="deck">
+      <div class="behind"></div>
+      <div class="meet-card">
+        <div class="photo">
+          <svg viewBox="0 0 24 24" fill="currentColor"><circle cx="8" cy="8" r="2.2"/><circle cx="16" cy="8" r="2.2"/><circle cx="5" cy="13.2" r="2"/><circle cx="19" cy="13.2" r="2"/><path d="M12 12.5c-3.3 0-6 2.4-6 5.3 0 1.9 1.5 3 3.3 2.6 1.1-.2 1.8-.8 2.7-.8s1.6.6 2.7.8c1.8.4 3.3-.7 3.3-2.6 0-2.9-2.7-5.3-6-5.3z"/></svg>
+        </div>
+        <div class="name">Mike</div>
+        <div class="breed">Labrador</div>
+        <p class="fact">Labs are famously food-motivated — Mike will forgive you anything for a treat.</p>
+      </div>
+    </div>
+
+    <div class="dots"><i class="on"></i><i></i></div>
+  </div>
+
+  <div class="tap-hint">Tap anywhere to continue</div>
+  <div class="home-indicator"></div>
+
+</div>
+</div>
+</body>
+</html>

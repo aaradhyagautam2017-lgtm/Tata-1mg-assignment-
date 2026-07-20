@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>01 · Entry point — home feed</title>
+<link rel="stylesheet" href="../shared/tokens-lofi.css">
+<link rel="stylesheet" href="../shared/device.css">
+<style>
+  /* Zepto home chrome, reproduced in grey.
+     Structure kept in sync with hifi/01-entry.html — see HANDOFF.md §2
+     for the block-by-block mapping. Dashed = our feature insertions;
+     solid grey fill = existing Zepto chrome we're reproducing. */
+  .loc-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 6px 20px 10px; gap: 10px;
+  }
+  .loc-header .eta { font-size: 18px; font-weight: 700; }
+  .loc-header .addr { font-size: 12px; color: var(--ink-2); margin-top: 2px; }
+  .top-actions { display: flex; align-items: center; gap: 8px; flex: none; }
+  .coin-ph {
+    height: 26px; padding: 0 10px; border-radius: 999px;
+    background: var(--fill-2); display: flex; align-items: center;
+    font-size: 11px; font-weight: 700; color: var(--ink-2);
+  }
+  .avatar { width: 34px; height: 34px; border-radius: 50%; background: var(--fill-2); flex: none; }
+
+  .toggles { display: flex; gap: 8px; padding: 0 20px 12px; }
+  .toggle {
+    font-size: 12px; font-weight: 500; color: var(--ink-2);
+    padding: 7px 14px; border-radius: 999px;
+    background: var(--fill); border: 1px solid var(--line);
+  }
+  .toggle.is-active { background: #2b2b2b; color: #fff; border-color: #2b2b2b; }
+
+  .search-row { display: flex; gap: 8px; padding: 0 20px 14px; }
+  .search {
+    flex: 1; padding: 12px 14px;
+    border: 1.5px solid var(--line); border-radius: var(--r-field);
+    font-size: 14px; color: var(--ink-3);
+    display: flex; align-items: center; gap: 8px;
+  }
+  .search .glass { width: 14px; height: 14px; border: 2px solid var(--ink-3); border-radius: 50%; flex: none; }
+
+  /* OUR ELEMENT · Pet Store mini-tile, Phase-1 discovery entry point */
+  .minitile-ph {
+    flex: none; width: 74px; border: var(--dash); border-radius: var(--r-field);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 9.5px; font-weight: 700; color: var(--ink-2); text-align: center; line-height: 1.2;
+  }
+
+  .lenses { display: flex; justify-content: space-between; padding: 0 20px 14px; }
+  .lens { display: flex; flex-direction: column; align-items: center; gap: 5px; width: 58px; position: relative; }
+  .lens .dot { width: 46px; height: 46px; border-radius: 50%; background: var(--fill); }
+  .lens .cap { font-size: 10.5px; color: var(--ink-2); }
+  .lens.is-active .dot { border: 2px solid #2b2b2b; }
+  .lens.is-active .cap { font-weight: 700; color: var(--ink); }
+  /* OUR ELEMENT · Pet Care lens, Phase-1 launch entry */
+  .lens--new .dot { border: var(--dash); background: transparent; }
+  .lens--new .new-badge {
+    position: absolute; top: -4px; right: 2px;
+    font-size: 7.5px; font-weight: 700; color: var(--ink-2);
+    border: 1px solid var(--ink-3); border-radius: 5px; padding: 1px 4px;
+  }
+
+  /* ==========================================================
+     OUR ELEMENT · campaign banner — single full-bleed art
+     placeholder + CTA overlay, matching hi-fi's "Paw Parade"
+     structure (headline/subhead/brand-row/photo/upload-bar are
+     now baked into one generated image, not separate live nodes)
+     ========================================================== */
+  .campaign-banner {
+    margin: 6px 20px 0; border: var(--dash); border-radius: var(--r-card);
+    aspect-ratio: 358 / 252; position: relative;
+    display: grid; place-items: center;
+    font-size: 11px; color: var(--ink-3); text-align: center; line-height: 1.5; padding: 16px;
+  }
+  .cb-cta {
+    position: absolute; right: 14px; bottom: 14px;
+    background: #2b2b2b; color: #fff; font-size: 12px; font-weight: 700;
+    padding: 10px 16px; border-radius: 12px;
+  }
+
+  /* category-card row beneath the banner (matches hi-fi 1:1 already) */
+  .cat-row { display: flex; gap: 10px; margin: 14px 20px 16px; overflow-x: auto; }
+  .cat-card { flex: none; width: 122px; background: var(--card); border: 1px solid var(--line); border-radius: 14px; overflow: hidden; }
+  .cat-card .ct { font-size: 12px; font-weight: 700; padding: 10px 10px 0; }
+  .cat-card .cp { display: flex; gap: 6px; padding: 8px 10px 10px; height: 58px; }
+  .cat-card .cp div { flex: 1; border: var(--dash); border-radius: 8px; }
+  .cat-card .cl { background: #2b2b2b; color: #fff; font-size: 10px; font-weight: 700; text-align: center; padding: 6px 4px; }
+
+  /* coupons & offers — existing Zepto surface, solid fill */
+  .sec-head { display: flex; justify-content: space-between; align-items: baseline; padding: 4px 20px 10px; }
+  .sec-title { font-size: 14px; font-weight: 700; }
+  .sec-see { font-size: 11.5px; color: var(--ink-3); }
+  .coupon-row-2 { display: flex; gap: 10px; padding: 0 20px 4px; overflow-x: auto; }
+  .coupon-ph {
+    flex: none; width: 132px; background: var(--card); border: 1px solid var(--line);
+    border-radius: 14px; padding: 11px 12px;
+  }
+  .coupon-ph .amt { font-size: 12px; font-weight: 700; }
+  .coupon-ph .cond { font-size: 10px; color: var(--ink-3); margin-top: 2px; }
+
+  /* steal deals block — existing Zepto surface, solid fill */
+  .steal {
+    margin: 12px 20px 0; border-radius: var(--r-card); padding: 16px;
+    background: var(--fill);
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .steal .h1 { font-size: 18px; font-weight: 700; }
+  .steal .h2 { font-size: 11px; color: var(--ink-2); margin-top: 3px; }
+  .steal .art { width: 60px; height: 60px; border-radius: 14px; background: var(--fill-2); flex: none; }
+
+  .scroll { padding-bottom: 18px; }
+
+  /* OUR ELEMENT · floating unlock nudge, above cart pill + bottom nav */
+  .float-wrap { position: absolute; left: 14px; right: 14px; bottom: 70px; z-index: 5; display: flex; gap: 10px; }
+  .unlock-ph {
+    flex: 1; border: var(--dash); border-radius: 16px; padding: 11px 14px;
+    display: flex; align-items: center; gap: 10px;
+    background: rgba(255,255,255,.9);
+  }
+  .unlock-ph .u-ic { width: 28px; height: 28px; border-radius: 50%; border: 1.5px solid var(--ink-3); flex: none; }
+  .unlock-ph .u1 { font-size: 12px; font-weight: 700; }
+  .unlock-ph .u2 { font-size: 10px; color: var(--ink-3); margin-top: 1px; }
+  .cart-ph {
+    flex: none; background: #2b2b2b; color: #fff; border-radius: 16px; padding: 9px 14px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .cart-ph .c-ic { width: 28px; height: 28px; border-radius: 8px; background: rgba(255,255,255,.2); }
+  .cart-ph .c1 { font-size: 12.5px; font-weight: 700; }
+  .cart-ph .c2 { font-size: 9.5px; color: #cfcfcf; margin-top: 1px; }
+
+  .bottom-nav {
+    flex: none;
+    display: flex;
+    border-top: 1px solid var(--line);
+    background: var(--page);
+    padding: 10px 0 4px;
+    position: relative; z-index: 6;
+  }
+  .bottom-nav .item { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+  .bottom-nav .ico { width: 22px; height: 22px; border-radius: 6px; background: var(--fill-2); }
+  .bottom-nav .cap { font-size: 10px; color: var(--ink-3); }
+  .bottom-nav .item.is-active .ico { background: #2b2b2b; }
+  .bottom-nav .item.is-active .cap { color: var(--ink); font-weight: 700; }
+</style>
+</head>
+<body>
+<div class="device">
+<div class="screen">
+
+  <div class="statusbar">
+    <span class="time">9:41</span>
+    <span class="cluster"><i class="sig"></i><i class="wifi"></i><i class="batt"></i></span>
+  </div>
+
+  <!-- Layer 1 · persistent top -->
+  <div class="loc-header">
+    <div>
+      <div class="eta">Delivery in 7 minutes</div>
+      <div class="addr">Home — HSR Layout, Bengaluru ▾</div>
+    </div>
+    <div class="top-actions">
+      <div class="coin-ph">Z 0</div>
+      <div class="avatar"></div>
+    </div>
+  </div>
+
+  <div class="toggles">
+    <span class="toggle is-active">Zepto</span>
+    <span class="toggle">Monsoon</span>
+    <span class="toggle">SuperMall</span>
+    <span class="toggle">Cafe</span>
+  </div>
+
+  <div class="search-row">
+    <div class="search"><span class="glass"></span>Search for “pet food”</div>
+    <!-- OUR ELEMENT · Pet Store mini-tile -->
+    <div class="minitile-ph">Pet Store</div>
+  </div>
+
+  <div class="lenses">
+    <div class="lens is-active"><div class="dot"></div><div class="cap">All</div></div>
+    <!-- OUR ELEMENT · Pet Care lens, new Phase-1 entry -->
+    <div class="lens lens--new"><div class="dot"></div><span class="new-badge">NEW</span><div class="cap">Pet Care</div></div>
+    <div class="lens"><div class="dot"></div><div class="cap">Pooja</div></div>
+    <div class="lens"><div class="dot"></div><div class="cap">Fresh</div></div>
+    <div class="lens"><div class="dot"></div><div class="cap">Electronics</div></div>
+  </div>
+
+  <div class="scroll">
+
+    <!-- OUR ELEMENT · campaign banner — full art placeholder + CTA -->
+    <div class="campaign-banner">
+      full campaign art<br>(headline + pet photo + branding baked in)
+      <span class="cb-cta">Upload Now →</span>
+    </div>
+
+    <!-- OUR ELEMENT · category cards, Structure-1 layout -->
+    <div class="cat-row">
+      <div class="cat-card">
+        <div class="ct">Daily Essentials</div>
+        <div class="cp"><div></div><div></div></div>
+        <div class="cl">Starting from ₹99</div>
+      </div>
+      <div class="cat-card">
+        <div class="ct">Treat Time</div>
+        <div class="cp"><div></div><div></div></div>
+        <div class="cl">Up to 40% Off</div>
+      </div>
+      <div class="cat-card">
+        <div class="ct">Grooming</div>
+        <div class="cp"><div></div><div></div></div>
+        <div class="cl">Up to 50% Off</div>
+      </div>
+      <div class="cat-card">
+        <div class="ct">Toys &amp; Play</div>
+        <div class="cp"><div></div><div></div></div>
+        <div class="cl">Starting from ₹79</div>
+      </div>
+      <div class="cat-card">
+        <div class="ct">Health &amp; Care</div>
+        <div class="cp"><div></div><div></div></div>
+        <div class="cl">Save up to 30%</div>
+      </div>
+    </div>
+
+    <!-- Layer 2 · coupons & offers, existing Zepto surface -->
+    <div class="sec-head"><span class="sec-title">Coupons &amp; Offers</span><span class="sec-see">See all ›</span></div>
+    <div class="coupon-row-2">
+      <div class="coupon-ph"><div class="amt">FLAT ₹50 OFF</div><div class="cond">above ₹499</div></div>
+      <div class="coupon-ph"><div class="amt">FLAT ₹100 OFF</div><div class="cond">above ₹799</div></div>
+      <div class="coupon-ph"><div class="amt">FLAT ₹150 OFF</div><div class="cond">above ₹1199</div></div>
+    </div>
+
+    <!-- Layer 2 · steal deals, existing Zepto surface -->
+    <div class="steal">
+      <div>
+        <div class="h1">Up to 60% off</div>
+        <div class="h2">Top brands · Ends soon</div>
+      </div>
+      <div class="art"></div>
+    </div>
+
+  </div>
+
+  <!-- OUR ELEMENT · floating unlock nudge + cart pill -->
+  <div class="float-wrap">
+    <div class="unlock-ph">
+      <div class="u-ic"></div>
+      <div><div class="u1">Unlock free delivery</div><div class="u2">Shop for ₹4 more</div></div>
+    </div>
+    <div class="cart-ph">
+      <div class="c-ic"></div>
+      <div><div class="c1">Cart</div><div class="c2">1 item</div></div>
+    </div>
+  </div>
+
+  <!-- Layer 4 · global bottom nav -->
+  <div class="bottom-nav">
+    <div class="item is-active"><div class="ico"></div><div class="cap">Home</div></div>
+    <div class="item"><div class="ico"></div><div class="cap">Categories</div></div>
+    <div class="item"><div class="ico"></div><div class="cap">Play &amp; Win</div></div>
+    <div class="item"><div class="ico"></div><div class="cap">Cafe</div></div>
+  </div>
+  <div class="home-indicator"></div>
+
+</div>
+</div>
+</body>
+</html>

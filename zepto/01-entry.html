@@ -1,0 +1,1263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>01 · Entry point — home feed (Zepto Campaign Banner)</title>
+<link rel="stylesheet" href="../shared/tokens-hifi.css">
+<link rel="stylesheet" href="../shared/device.css">
+<style>
+  /* Screen wrapper */
+  .s01 { background: #F3F5F7; }
+
+  /* Header skin matching original soft teal-grey */
+  .s01 .skin {
+    position: absolute; top: 0; left: 0; right: 0; height: 325px;
+    background: linear-gradient(180deg, #8EB7BE 0%, #A2C8CE 65%, #C2E2E6 90%, #F3F5F7 100%);
+    z-index: 0;
+  }
+  .s01 > * { position: relative; z-index: 1; }
+
+  /* Status bar */
+  .s01 .statusbar .time { color: var(--ink-max); }
+  .s01 .statusbar .cluster i { background: var(--ink-max); }
+
+  /* ---------- location row + coin/profile ---------- */
+  .s01 .loc-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 6px 16px 8px;
+    gap: 10px;
+  }
+  .s01 .loc-info {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+  }
+  .s01 .eta {
+    font-size: 19px;
+    font-weight: 900;
+    letter-spacing: -.6px;
+    color: var(--ink-max);
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    line-height: 1.1;
+  }
+  .s01 .eta span.thunder {
+    font-size: 18px;
+    color: var(--ink-max);
+  }
+  .s01 .addr {
+    font-size: 11.5px;
+    font-weight: 700;
+    color: rgba(38, 42, 51, 0.8);
+    margin-top: 2px;
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .s01 .addr svg {
+    width: 12px;
+    height: 12px;
+    color: var(--ink-max);
+    flex-shrink: 0;
+  }
+  .s01 .top-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+  }
+  /* Coins pill */
+  .s01 .coin {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    background: #4B2A6B;
+    border-radius: var(--r-pill);
+    padding: 3px 9px 3px 3px;
+    box-shadow: 0 2px 6px rgba(75, 42, 107, 0.15);
+  }
+  .s01 .coin .z {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 30%, #FFEBA3 0%, #F5C143 60%, #CD9618 100%);
+    display: grid;
+    place-items: center;
+    font-size: 10px;
+    font-weight: 900;
+    color: #5C3D00;
+  }
+  .s01 .coin .n {
+    font-size: 12.5px;
+    font-weight: 900;
+    color: #fff;
+  }
+  .s01 .profile {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: 1.5px solid rgba(255,255,255,0.6);
+    overflow: hidden;
+    box-shadow: var(--shadow-sm);
+  }
+  .s01 .profile img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  /* ---------- storefront toggle cards ---------- */
+  .s01 .stores {
+    display: flex;
+    gap: 8px;
+    padding: 4px 16px 12px;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .s01 .stores::-webkit-scrollbar { display: none; }
+  .s01 .store {
+    flex: 1;
+    height: 48px;
+    border-radius: 14px;
+    background: #fff;
+    border: 1.5px solid transparent;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.03);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1px;
+    position: relative;
+    cursor: pointer;
+  }
+  .s01 .store.is-active {
+    background: #D9ECEF;
+    border-color: transparent;
+  }
+  .s01 .store.is-active::after {
+    content: "";
+    position: absolute;
+    left: 20px;
+    right: 20px;
+    bottom: -1px;
+    height: 3px;
+    background: var(--purple);
+    border-radius: 3px 3px 0 0;
+  }
+  .s01 .store .w1 {
+    font-size: 15px;
+    font-weight: 900;
+    letter-spacing: -.6px;
+    line-height: 1;
+  }
+  .s01 .store .w2 {
+    font-size: 8px;
+    font-weight: 800;
+    letter-spacing: .05em;
+    line-height: 1.1;
+  }
+  .s01 .st-zepto .w1 {
+    color: var(--purple);
+    font-size: 17.5px;
+  }
+  .s01 .st-monsoon .w1 { color: #1D5997; font-size: 13px; }
+  .s01 .st-monsoon .w2 { color: #1D5997; }
+  .s01 .st-mall .w1 { color: #101418; font-size: 13px; }
+  .s01 .st-mall .w1 b { color: var(--purple); }
+  .s01 .st-cafe {
+    justify-content: flex-start;
+    padding-top: 6px;
+  }
+  .s01 .st-cafe .w1 { color: var(--purple); font-size: 13.5px; }
+  .s01 .st-cafe .cafe-badge {
+    background: #FA3778;
+    color: #fff;
+    font-size: 7.5px;
+    font-weight: 800;
+    padding: 1.5px 5px;
+    border-radius: 5px;
+    margin-top: 2px;
+    line-height: 1;
+  }
+
+  /* ---------- search + mini promo tile ---------- */
+  .s01 .search-row {
+    display: flex;
+    gap: 8px;
+    padding: 0 16px 12px;
+  }
+  .s01 .search {
+    flex: 1;
+    background: #fff;
+    border: 1px solid rgba(0,0,0,0.04);
+    border-radius: var(--r-field);
+    padding: 11px 12px;
+    font-size: 13.5px;
+    color: var(--grey-1);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.01);
+  }
+  .s01 .search svg {
+    width: 16px;
+    height: 16px;
+    color: var(--grey-1);
+    flex-shrink: 0;
+  }
+  .s01 .search b {
+    color: var(--ink-max);
+    font-weight: 700;
+  }
+  .s01 .cursor {
+    display: inline-block;
+    width: 1.5px;
+    height: 14px;
+    background: var(--ink-max);
+    margin-left: 2px;
+    animation: blink 1s step-end infinite;
+    vertical-align: middle;
+  }
+  @keyframes blink {
+    from, to { background-color: transparent }
+    50% { background-color: var(--ink-max); }
+  }
+
+  .s01 .minitile {
+    flex: none;
+    width: 82px;
+    background: #fff;
+    border: 1px solid rgba(0,0,0,0.04);
+    border-radius: var(--r-field);
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 0 6px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.01);
+  }
+  .s01 .minitile .mt-txt {
+    font-size: 9.5px;
+    font-weight: 800;
+    color: #0E7F55;
+    line-height: 1.15;
+  }
+  .s01 .minitile .mt-art {
+    width: 28px;
+    height: 28px;
+    flex: none;
+    border-radius: 6px;
+    overflow: hidden;
+    display: grid;
+    place-items: center;
+  }
+  .s01 .minitile .mt-art img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  /* ---------- lenses (no background boxes) ---------- */
+  .s01 .lenses {
+    display: flex;
+    gap: 16px;
+    padding: 0 16px;
+    overflow-x: auto;
+    scrollbar-width: none;
+    border-bottom: 1.5px solid rgba(220, 220, 225, 0.6);
+  }
+  .s01 .lenses::-webkit-scrollbar { display: none; }
+  .s01 .lens {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    padding-bottom: 8px;
+    position: relative;
+    flex-shrink: 0;
+    cursor: pointer;
+  }
+  .s01 .lens .li {
+    width: 32px;
+    height: 32px;
+    display: grid;
+    place-items: center;
+  }
+  .s01 .lens .li svg {
+    width: 24px;
+    height: 24px;
+  }
+  .s01 .lens .lt {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--grey-1);
+    white-space: nowrap;
+  }
+  .s01 .lens.is-active .lt {
+    color: var(--ink-max);
+    font-weight: 800;
+  }
+  .s01 .lens.is-active::after {
+    content: "";
+    position: absolute;
+    left: -4px;
+    right: -4px;
+    bottom: -1.5px;
+    height: 3px;
+    background: var(--ink-max);
+    border-radius: 3px 3px 0 0;
+  }
+
+  /* ---------- feed scroll ---------- */
+  .s01 .scroll {
+    flex: 1;
+    overflow-y: auto;
+    padding-bottom: 120px;
+  }
+
+  /* ===== HERO · Elevated Concept 1 Campaign Banner ===== */
+  .s01 .hero {
+    margin: 12px 16px 0;
+    border-radius: 20px;
+    position: relative;
+    overflow: hidden;
+    background: linear-gradient(135deg, #F3EBFF 0%, #E8D9FB 100%);
+    border: 1px solid #E2D3F5;
+    box-shadow: 0 10px 24px rgba(120,40,180,0.1);
+    min-height: 275px;
+    display: flex;
+    flex-direction: column;
+    padding: 16px;
+  }
+  .s01 .hero-main {
+    display: flex;
+    justify-content: space-between;
+    flex: 1;
+  }
+  .s01 .hero-txt {
+    width: 60%;
+    z-index: 2;
+  }
+  .s01 .hero-head {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-style: italic;
+    font-size: 23px;
+    line-height: 1.15;
+    color: var(--purple-deep);
+    text-shadow: 0 1px 2px rgba(255,255,255,0.6);
+  }
+  .s01 .hero-sub {
+    font-size: 10px;
+    color: var(--grey-1);
+    margin-top: 8px;
+    line-height: 1.35;
+    font-weight: 600;
+  }
+
+  /* Brand logos partner row */
+  .s01 .partner-row {
+    margin-top: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .s01 .partner-lbl {
+    font-size: 7px;
+    font-weight: 800;
+    letter-spacing: .08em;
+    color: var(--grey-2);
+  }
+  .s01 .partner-logos {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .s01 .p-logo {
+    font-size: 8px;
+    font-weight: 900;
+    letter-spacing: -.2px;
+    padding: 2px 4px;
+    border-radius: 4px;
+    background: rgba(255,255,255,0.8);
+    border: 1px solid rgba(0,0,0,0.03);
+    line-height: 1;
+  }
+  .s01 .pl-whiskas { color: var(--purple); font-family: var(--font-display); }
+  .s01 .pl-drools { color: #1D5997; }
+  .s01 .pl-pedigree { color: #B92323; background: #FFD54F; }
+  .s01 .pl-rc { color: #D11F1F; font-size: 7.5px; border-top: 1.5px solid #D11F1F; border-bottom: 1.5px solid #D11F1F; border-radius: 0; }
+
+  /* Dog & Cat cozy room SVG Scene on right */
+  .s01 .hero-art {
+    width: 125px;
+    height: 110px;
+    z-index: 1;
+    position: absolute;
+    right: 8px;
+    top: 16px;
+  }
+  .s01 .hero-art svg {
+    width: 100%;
+    height: 100%;
+  }
+
+  /* Containment Bordered CTA Card (Concept 3 treatment style) */
+  .s01 .cta-panel {
+    z-index: 3;
+    margin-top: 12px;
+    background: #fff;
+    border: 1.5px solid #E2C0EB;
+    border-radius: 14px;
+    padding: 10px 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    box-shadow: 0 4px 12px rgba(120,40,180,0.05);
+  }
+  .s01 .cta-btn {
+    width: 100%;
+    background: var(--pink);
+    color: #fff;
+    font-size: 13.5px;
+    font-weight: 800;
+    padding: 10px 0;
+    border-radius: 10px;
+    text-align: center;
+    box-shadow: 0 4px 10px rgba(250,55,120,0.25);
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+  }
+  .s01 .cta-btn:active {
+    background: var(--pink-press);
+  }
+  .s01 .cta-helper {
+    font-size: 9px;
+    font-weight: 700;
+    color: var(--grey-2);
+    text-align: center;
+  }
+
+  /* Scallop free delivery badge (smaller and placed elegantly) */
+  .s01 .hero-badge {
+    position: absolute;
+    top: 6px;
+    left: 170px;
+    z-index: 3;
+    width: 48px;
+    height: 48px;
+    transform: rotate(-6deg);
+  }
+  .s01 .hero-badge svg {
+    width: 100%;
+    height: 100%;
+  }
+  .s01 .hero-badge .bt {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: #6E37C6;
+    text-align: center;
+  }
+  .s01 .hero-badge .bt .b1 { font-size: 6px; font-weight: 800; }
+  .s01 .hero-badge .bt .b2 { font-size: 7.5px; font-weight: 900; line-height: 0.95; }
+  .s01 .hero-badge .bt .b3 { font-size: 5px; font-weight: 800; margin-top: 1px; }
+
+  .s01 .hero-dots {
+    display: flex;
+    gap: 5px;
+    justify-content: center;
+    margin: 10px 0 4px;
+  }
+  .s01 .hero-dots i {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: #D2C4E5;
+    display: block;
+  }
+  .s01 .hero-dots i.on {
+    background: var(--purple);
+    width: 14px;
+    border-radius: 3px;
+  }
+
+  /* ===== Concept 1 Generic Category Strip (Pre-upload) ===== */
+  .s01 .sec-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 16px 10px;
+  }
+  .s01 .sec-title {
+    font-size: 15px;
+    font-weight: 800;
+    color: var(--ink-max);
+  }
+  .s01 .sec-see {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--purple);
+  }
+  .s01 .catrail {
+    display: flex;
+    gap: 10px;
+    padding: 0 16px 6px;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .s01 .catrail::-webkit-scrollbar { display: none; }
+  
+  /* Concept 1 Category Rectangular Card style */
+  .s01 .cat-card {
+    flex-shrink: 0;
+    width: 78px;
+    height: 115px;
+    background: #fff;
+    border-radius: 14px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+    border: 1px solid rgba(220, 220, 225, 0.4);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  .s01 .cat-card .packshot-area {
+    flex: 1;
+    background: #fff;
+    display: grid;
+    place-items: center;
+    padding: 6px;
+  }
+  .s01 .cat-card .packshot-area img {
+    width: 52px;
+    height: 52px;
+    object-fit: contain;
+  }
+  .s01 .cat-card .label-bar {
+    background: var(--purple);
+    padding: 6px 4px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 1.5px;
+  }
+  .s01 .cat-card .label-bar .title {
+    font-size: 8px;
+    font-weight: 800;
+    color: #fff;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    letter-spacing: -0.1px;
+  }
+  .s01 .cat-card .label-bar .offer {
+    font-size: 7px;
+    font-weight: 700;
+    color: #F3EBFF;
+    white-space: nowrap;
+  }
+
+  /* ===== coupons row ===== */
+  .s01 .coupon-row {
+    display: flex;
+    gap: 10px;
+    padding: 0 16px 6px;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .s01 .coupon-row::-webkit-scrollbar { display: none; }
+  .s01 .coupon-card {
+    flex: none;
+    width: 140px;
+    background: #fff;
+    border: 1.5px dashed #E2C0EB;
+    border-radius: 14px;
+    padding: 10px 10px;
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.02);
+  }
+  .s01 .coupon-card::before, .s01 .coupon-card::after {
+    content: ""; position: absolute; top: 50%; transform: translateY(-50%);
+    width: 10px; height: 10px; border-radius: 50%; background: #F3F5F7; border: 1.5px solid #E2C0EB;
+  }
+  .s01 .coupon-card::before { left: -6.5px; border-left: none; }
+  .s01 .coupon-card::after { right: -6.5px; border-right: none; }
+  .s01 .coupon-card .cc-ic {
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+    background: var(--green-tint);
+    color: var(--green);
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+  }
+  .s01 .coupon-card .cc-ic svg {
+    width: 16px;
+    height: 16px;
+  }
+  .s01 .coupon-card .amt {
+    font-size: 12px;
+    font-weight: 900;
+    color: var(--purple-deep);
+    line-height: 1.2;
+  }
+  .s01 .coupon-card .cond {
+    font-size: 9.5px;
+    color: var(--grey-2);
+    margin-top: 1px;
+    font-weight: 500;
+  }
+
+  /* ===== steal deals block ===== */
+  .s01 .steal {
+    margin: 14px 16px 0;
+    border-radius: 18px;
+    padding: 14px 16px;
+    background: linear-gradient(135deg, #FFE3EE 0%, #FFC8DC 100%);
+    border: 1px solid rgba(255, 190, 210, 0.4);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(250,55,120,0.06);
+  }
+  .s01 .steal .h1 {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-style: italic;
+    font-size: 21px;
+    color: #B2185B;
+  }
+  .s01 .steal .h2 {
+    font-size: 11px;
+    color: #C43A6E;
+    font-weight: 700;
+    margin-top: 2px;
+  }
+  .s01 .steal .art {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    background: rgba(255,255,255,0.6);
+    display: grid;
+    place-items: center;
+  }
+  .s01 .steal .art svg {
+    width: 24px;
+    height: 24px;
+    color: #E0447E;
+  }
+
+  /* ===== floating pills + bottom nav ===== */
+  .s01 .float-wrap {
+    position: absolute;
+    left: 12px;
+    right: 12px;
+    bottom: 68px;
+    z-index: 5;
+    display: flex;
+    gap: 8px;
+    align-items: flex-end;
+  }
+  
+  /* OffersCollapsedTab */
+  .s01 .offers-tab {
+    position: absolute;
+    left: 104px;
+    top: -12px;
+    background: #fff;
+    border: 1.5px solid #F0D0DE;
+    border-bottom: none;
+    color: var(--pink);
+    font-size: 10.5px;
+    font-weight: 800;
+    padding: 2.5px 12px;
+    border-radius: 8px 8px 0 0;
+    box-shadow: 0 -2px 6px rgba(0,0,0,0.04);
+    display: flex;
+    align-items: center;
+    gap: 3px;
+  }
+  .s01 .offers-tab svg { width: 9px; height: 9px; }
+  
+  /* Left delivery pill */
+  .s01 .unlock {
+    flex: 1;
+    background: #222B36;
+    color: #fff;
+    border-radius: 20px;
+    padding: 10px 14px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    box-shadow: var(--shadow-bar);
+  }
+  .s01 .unlock .u-ic {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.15);
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+  }
+  .s01 .unlock .u-ic svg {
+    width: 18px;
+    height: 18px;
+    color: #fff;
+  }
+  .s01 .unlock .u-txt {
+    display: flex;
+    flex-direction: column;
+  }
+  .s01 .unlock .u1 {
+    font-size: 12.5px;
+    font-weight: 800;
+    line-height: 1.2;
+  }
+  .s01 .unlock .u2 {
+    font-size: 10px;
+    color: #BAC2CC;
+    margin-top: 1.5px;
+    line-height: 1;
+  }
+  
+  /* Right cart pill */
+  .s01 .cart-pill {
+    flex: none;
+    background: var(--pink);
+    color: #fff;
+    border-radius: 20px;
+    padding: 10px 14px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    box-shadow: 0 6px 16px rgba(250,55,120,0.3);
+    cursor: pointer;
+  }
+  .s01 .cart-pill .cp-ic {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    background: #fff;
+    display: grid;
+    place-items: center;
+    overflow: hidden;
+    position: relative;
+  }
+  .s01 .cart-pill .cp-ic img.prod-thumb {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .s01 .cart-pill .cp-ic svg.cart-small {
+    position: absolute;
+    bottom: -2.5px;
+    right: -2.5px;
+    width: 15px;
+    height: 15px;
+    background: var(--pink);
+    border: 1.5px solid #fff;
+    border-radius: 50%;
+    padding: 1.5px;
+    color: #fff;
+  }
+  .s01 .cart-pill .c-txt {
+    display: flex;
+    flex-direction: column;
+  }
+  .s01 .cart-pill .c1 {
+    font-size: 13px;
+    font-weight: 800;
+    line-height: 1.2;
+  }
+  .s01 .cart-pill .c2 {
+    font-size: 10px;
+    color: #FFE0EC;
+    margin-top: 1.5px;
+    font-weight: 700;
+    line-height: 1;
+  }
+
+  /* Bottom navigation bar */
+  .s01 .bottom-nav {
+    flex-shrink: 0;
+    display: flex;
+    border-top: 1px solid var(--hairline);
+    background: #fff;
+    padding: 8px 0 4px;
+    position: relative;
+    z-index: 6;
+  }
+  .s01 .bottom-nav .item {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    cursor: pointer;
+  }
+  .s01 .bottom-nav svg {
+    width: 21px;
+    height: 21px;
+    color: var(--grey-1);
+    stroke-width: 2.2;
+  }
+  .s01 .bottom-nav .cap {
+    font-size: 9.5px;
+    color: var(--grey-1);
+    font-weight: 700;
+  }
+  
+  /* Home active squircle */
+  .s01 .bottom-nav .item.is-active .zbadge {
+    background: var(--pink);
+    color: #fff;
+    box-shadow: 0 2px 6px rgba(250,55,120,0.25);
+  }
+  .s01 .bottom-nav .item.is-active .cap {
+    color: var(--pink);
+    font-weight: 800;
+  }
+  .s01 .zbadge {
+    width: 22px;
+    height: 22px;
+    border-radius: 8px;
+    display: grid;
+    place-items: center;
+    font-size: 12px;
+    font-weight: 900;
+    font-family: var(--font-display);
+    color: #fff;
+    background: var(--pink);
+  }
+
+  /* Floating brand badge over bottom bar */
+  .s01 .bingo-badge {
+    position: absolute;
+    right: 12px;
+    bottom: 24px;
+    width: 44px;
+    height: 44px;
+    z-index: 7;
+    pointer-events: none;
+  }
+  .s01 .bingo-badge svg {
+    width: 100%;
+    height: 100%;
+  }
+</style>
+</head>
+<body>
+<div class="device">
+<div class="screen s01">
+
+  <!-- Soft teal-grey campaign header backdrop -->
+  <div class="skin"></div>
+
+  <!-- Android/iOS styled status bar -->
+  <div class="statusbar">
+    <span class="time">15:22</span>
+    <span class="cluster">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" style="margin-right:2px"><path d="M17 1.01L7 1c-1.1 0-2 .9-2 2v18c0 1.1.9 2 2 2h10c1.1 0 2-.9 2-2V3c0-1.1-.9-1.99-2-1.99zM17 19H7V5h10v14z"/></svg>
+      <i class="sig"></i>
+      <i class="wifi"></i>
+      <i class="batt" style="width:20px;border-radius:3px;position:relative;background:#262A33"><span style="position:absolute;font-size:7px;color:#fff;font-weight:900;left:4px;top:0px">30</span></i>
+    </span>
+  </div>
+
+  <!-- Location Header & Coin / Profile badges -->
+  <div class="loc-header">
+    <div class="loc-info">
+      <div class="eta">
+        <span class="thunder">⚡</span>
+        7 minutes
+      </div>
+      <div class="addr">
+        Other — D103, freedom fighter enclave, ...
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+      </div>
+    </div>
+    <div class="top-actions">
+      <div class="coin">
+        <span class="z">Z</span>
+        <span class="n">0</span>
+      </div>
+      <div class="profile">
+        <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=100&h=100" alt="User avatar">
+      </div>
+    </div>
+  </div>
+
+  <!-- Store selection tabs -->
+  <div class="stores">
+    <div class="store st-zepto is-active">
+      <span class="w1">zepto</span>
+    </div>
+    <div class="store st-monsoon"><span class="w1">MONSOON</span><span class="w2">STORE</span></div>
+    <div class="store st-mall"><span class="w1">Super<b>Mall.</b></span></div>
+    <div class="store st-cafe">
+      <span class="w1">cafe</span>
+      <span class="cafe-badge">From ₹39</span>
+    </div>
+  </div>
+
+  <!-- Search input + Mango Mania vertical promo tile -->
+  <div class="search-row">
+    <div class="search">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+      Search for &ldquo;Fa<span class="cursor"></span>&rdquo;
+    </div>
+    <div class="minitile">
+      <div class="mt-txt">Mango<br>Mania</div>
+      <div class="mt-art">
+        <img src="https://images.unsplash.com/photo-1553279768-865429fa0078?auto=format&fit=crop&q=80&w=100&h=100" alt="Mango">
+      </div>
+    </div>
+  </div>
+
+  <!-- Lenses tabs -->
+  <div class="lenses">
+    <div class="lens is-active">
+      <div class="li">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#C97A2B" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M6 8h12l-1 12H7z"/>
+          <path d="M9 8a3 3 0 0 1 6 0"/>
+        </svg>
+      </div>
+      <div class="lt">All</div>
+    </div>
+    <div class="lens">
+      <div class="li">
+        <svg viewBox="0 0 24 24" fill="currentColor" color="#C77D23">
+          <circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" stroke-width="2"/>
+          <circle cx="12" cy="12" r="2.5"/>
+          <circle cx="8" cy="12" r="1.5"/>
+          <circle cx="16" cy="12" r="1.5"/>
+          <circle cx="12" cy="8" r="1.5"/>
+          <circle cx="12" cy="16" r="1.5"/>
+        </svg>
+      </div>
+      <div class="lt">Pooja</div>
+    </div>
+    <div class="lens">
+      <div class="li">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#D32F2F" stroke-width="2" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="9"/>
+          <path d="M12 3l2.5 5.5h6l-4.5 4 2 6-6-3.5-6 3.5 2-6-4.5-4h6z" fill="#D32F2F" stroke="none"/>
+        </svg>
+      </div>
+      <div class="lt">Match Day</div>
+    </div>
+    <div class="lens">
+      <div class="li">
+        <svg viewBox="0 0 24 24" fill="currentColor" color="#D14545">
+          <path d="M12 20c-3.3 0-6-2.7-6-6 0-3.5 2.5-6.5 5.5-6.9.3-.05.5.2.5.5V11c0 1.1.9 2 2 2h3.4c.3 0 .5.3.4.5C17.3 17.2 14.8 20 12 20z"/>
+          <path d="M12 7c.5-2.5 2-4 4-4" fill="none" stroke="#2B9549" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <div class="lt">Fresh</div>
+    </div>
+    <div class="lens">
+      <div class="li">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#3657BE" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M5 13v-1a7 7 0 0 1 14 0v1"/>
+          <rect x="3" y="13" width="4" height="7" rx="2" fill="#3657BE" stroke="none"/>
+          <rect x="17" y="13" width="4" height="7" rx="2" fill="#3657BE" stroke="none"/>
+        </svg>
+      </div>
+      <div class="lt">Electronics</div>
+    </div>
+  </div>
+
+  <div class="scroll">
+
+    <!-- Concept 1 Campaign Hero Banner -->
+    <div class="hero">
+      <div class="hero-main">
+        <div class="hero-txt">
+          <div class="hero-head">Show us your pet.<br>Delivery's on us.</div>
+          <div class="hero-sub">Free delivery on pet care, no minimum. Plus two coupons picked for what they actually eat.</div>
+          
+          <!-- Brand LogoRow -->
+          <div class="partner-row">
+            <span class="partner-lbl">POWERED BY</span>
+            <div class="partner-logos">
+              <span class="p-logo pl-whiskas">whiskas</span>
+              <span class="p-logo pl-drools">drools</span>
+              <span class="p-logo pl-pedigree">Pedigree</span>
+              <span class="p-logo pl-rc">ROYAL CANIN</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 3D-Lite cozy room SVG Scene (A cat and a dog together in a room) -->
+        <div class="hero-art">
+          <svg viewBox="0 0 130 110" xmlns="http://www.w3.org/2000/svg">
+            <!-- Ground shadow -->
+            <ellipse cx="65" cy="98" rx="60" ry="6" fill="rgba(80,40,110,0.18)"/>
+            
+            <!-- Cozy Sofa (purple) in backdrop -->
+            <path d="M10 88 C 10 50, 110 50, 110 88 Z" fill="#9C83C0" opacity="0.6"/>
+            <rect x="25" y="70" width="70" height="24" rx="6" fill="#896EB0" opacity="0.8"/>
+            
+            <!-- Houseplant on far right -->
+            <rect x="105" y="78" width="10" height="18" rx="2" fill="#E2A6B4"/> <!-- pink pot -->
+            <path d="M110 78 Q 115 65, 122 72 M110 78 Q 105 60, 98 68 M110 78 Q 110 55, 112 65" stroke="#3E8E53" stroke-width="3" fill="none" stroke-linecap="round"/>
+            
+            <!-- Pet Food Bowl in front center -->
+            <path d="M55 96 h20 l-2 -8 h-16 z" fill="#FA3778"/>
+            <ellipse cx="65" cy="92" rx="7" ry="1.5" fill="#D81D59"/>
+            
+            <!-- ==== Mike (Golden Labrador) sitting on left ==== -->
+            <!-- Body -->
+            <path d="M22 98 q-6 -30 18 -32 q24 2 18 32z" fill="#ECAE64"/>
+            <!-- Head -->
+            <circle cx="34" cy="58" r="16" fill="#F4C284"/>
+            <ellipse cx="34" cy="65" rx="10" ry="7" fill="#FCE1BC"/>
+            <!-- Nose & mouth -->
+            <ellipse cx="34" cy="62" rx="3" ry="2" fill="#3D2A1B"/>
+            <path d="M34 64 q-3 2.5 -5 .5 M34 64 q3 2.5 5 .5" stroke="#7A5D3B" stroke-width="1" fill="none" stroke-linecap="round"/>
+            <!-- Ears -->
+            <path d="M20 54 q-6 -3 -6 -12 q2 -6 6 -4 q-2 8 4 14z" fill="#CD8C3E"/>
+            <path d="M48 54 q6 -3 6 -12 q-2 -6-6 -4 q2 8 -4 14z" fill="#CD8C3E"/>
+            <!-- Eyes -->
+            <circle cx="29" cy="54" r="2" fill="#302014"/>
+            <circle cx="39" cy="54" r="2" fill="#302014"/>
+            <circle cx="29.5" cy="53.5" r="0.6" fill="#fff"/>
+            <circle cx="39.5" cy="53.5" r="0.6" fill="#fff"/>
+            
+            <!-- ==== Meesha (Grey Tabby Cat) sitting on right ==== -->
+            <!-- Tail -->
+            <path d="M85 98 q12 -1 11 -12 q-1 -7 -8 -6 q5 2 4 8 q-1 7 -9 6z" fill="#AEB5C2"/>
+            <!-- Body -->
+            <path d="M68 98 q-3 -22 12 -23 q15 1 12 23z" fill="#BFC4CE"/>
+            <!-- Head -->
+            <circle cx="79" cy="68" r="12" fill="#CCD1DA"/>
+            <!-- Ears -->
+            <path d="M71 63 l-4 -10 l10 5z" fill="#BFC4CE"/>
+            <path d="M87 63 l4 -10 l-10 5z" fill="#BFC4CE"/>
+            <path d="M72 61 l-2 -6 l5 3z" fill="#EFA9BC"/>
+            <path d="M86 61 l2 -6 l-5 3z" fill="#EFA9BC"/>
+            <!-- Eyes -->
+            <ellipse cx="75" cy="67" rx="1.5" ry="2.2" fill="#2E3C2D"/>
+            <ellipse cx="83" cy="67" rx="1.5" ry="2.2" fill="#2E3C2D"/>
+            <circle cx="75.3" cy="66.3" r="0.5" fill="#fff"/>
+            <circle cx="83.3" cy="66.3" r="0.5" fill="#fff"/>
+            <!-- Nose & mouth -->
+            <path d="M79 71 l-1.5 -1 h3z" fill="#E88AA0"/>
+            <path d="M79 72 q-2 1.5 -3.5 .5 M79 72 q2 1.5 3.5 .5" stroke="#808794" stroke-width="0.8" fill="none" stroke-linecap="round"/>
+          </svg>
+        </div>
+      </div>
+
+      <!-- Scallop free delivery badge (borrowed look) -->
+      <div class="hero-badge">
+        <svg viewBox="0 0 100 100"><path fill="#FFD84D" d="M50 2l9 8 12-3 4 12 12 4-3 12 8 9-8 9 3 12-12 4-4 12-12-3-9 8-9-8-12 3-4-12-12-4 3-12-8-9 8-9-3-12 12-4 4-12 12 3z"/></svg>
+        <div class="bt"><span class="b1">FREE</span><span class="b2">DELIVERY</span><span class="b3">NO MIN.</span></div>
+      </div>
+
+      <!-- CTA Bordered Panel (Concept 3 containment style) -->
+      <div class="cta-panel">
+        <div class="cta-btn">Add your pet's photo</div>
+        <div class="cta-helper">One photo. Works for every pet in the house.</div>
+      </div>
+    </div>
+
+    <!-- Banner indicators -->
+    <div class="hero-dots"><i class="on"></i><i></i><i></i></div>
+
+    <!-- Shop Pet Care Category Rail Section (Concept 1 style rectangular cards) -->
+    <div class="sec-head">
+      <span class="sec-title">Shop Pet Care</span>
+      <span class="sec-see">See all ›</span>
+    </div>
+    
+    <!-- 5 Generic Category Cards Strip (Pre-upload state) -->
+    <div class="catrail">
+      <div class="cat-card">
+        <div class="packshot-area">
+          <img src="https://images.unsplash.com/photo-1589722244358-9c766370724b?auto=format&fit=crop&q=80&w=100&h=100" alt="Daily Essentials">
+        </div>
+        <div class="label-bar">
+          <span class="title">Daily Essentials</span>
+          <span class="offer">Starting from ₹99</span>
+        </div>
+      </div>
+      <div class="cat-card">
+        <div class="packshot-area">
+          <img src="https://images.unsplash.com/photo-1628009368231-7bb7cfcb0def?auto=format&fit=crop&q=80&w=100&h=100" alt="Treat Time">
+        </div>
+        <div class="label-bar">
+          <span class="title">Treat Time</span>
+          <span class="offer">Up to 40% Off</span>
+        </div>
+      </div>
+      <div class="cat-card">
+        <div class="packshot-area">
+          <img src="https://images.unsplash.com/photo-1516733729877-db5383961b4d?auto=format&fit=crop&q=80&w=100&h=100" alt="Grooming">
+        </div>
+        <div class="label-bar">
+          <span class="title">Grooming</span>
+          <span class="offer">Up to 50% Off</span>
+        </div>
+      </div>
+      <div class="cat-card">
+        <div class="packshot-area">
+          <img src="https://images.unsplash.com/photo-1576201836106-db1758fd1c97?auto=format&fit=crop&q=80&w=100&h=100" alt="Toys & Play">
+        </div>
+        <div class="label-bar">
+          <span class="title">Toys & Play</span>
+          <span class="offer">Starting from ₹79</span>
+        </div>
+      </div>
+      <div class="cat-card">
+        <div class="packshot-area">
+          <img src="https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?auto=format&fit=crop&q=80&w=100&h=100" alt="Health & Care">
+        </div>
+        <div class="label-bar">
+          <span class="title">Health & Care</span>
+          <span class="offer">Save up to 30%</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Coupons & Offers section -->
+    <div class="sec-head">
+      <span class="sec-title">Coupons &amp; Offers</span>
+      <span class="sec-see">See all ›</span>
+    </div>
+    <div class="coupon-row">
+      <div class="coupon-card">
+        <div class="cc-ic">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 15l6-6M9.5 9.5h.01M14.5 14.5h.01"/><rect x="3" y="3" width="18" height="18" rx="4"/></svg>
+        </div>
+        <div>
+          <div class="amt">FLAT ₹50 OFF</div>
+          <div class="cond">above ₹499</div>
+        </div>
+      </div>
+      <div class="coupon-card">
+        <div class="cc-ic">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 15l6-6M9.5 9.5h.01M14.5 14.5h.01"/><rect x="3" y="3" width="18" height="18" rx="4"/></svg>
+        </div>
+        <div>
+          <div class="amt">FLAT ₹100 OFF</div>
+          <div class="cond">above ₹799</div>
+        </div>
+      </div>
+      <div class="coupon-card">
+        <div class="cc-ic">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 15l6-6M9.5 9.5h.01M14.5 14.5h.01"/><rect x="3" y="3" width="18" height="18" rx="4"/></svg>
+        </div>
+        <div>
+          <div class="amt">FLAT ₹150 OFF</div>
+          <div class="cond">above ₹1199</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Steal Deals section -->
+    <div class="steal">
+      <div>
+        <div class="h1">Up to 60% off</div>
+        <div class="h2">Top brands · Ends soon</div>
+      </div>
+      <div class="art">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M20.6 13.4L13 21a2 2 0 0 1-2.8 0l-7-7A2 2 0 0 1 2.6 12.4V4.6A2 2 0 0 1 4.6 2.6h7.8a2 2 0 0 1 1.4.6l6.8 6.8a2 2 0 0 1 0 2.8z"/>
+          <circle cx="7.5" cy="7.5" r="1.5"/>
+        </svg>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Floating bottom actions -->
+  <div class="float-wrap">
+    <!-- Collapsed pink offers tab -->
+    <span class="offers-tab">
+      Offers 
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 15l6-6 6 6"/></svg>
+    </span>
+
+    <!-- Left delivery pill with scooter icon -->
+    <div class="unlock">
+      <div class="u-ic">
+        <!-- Scooter SVG -->
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="6" cy="18" r="2"/>
+          <circle cx="18" cy="18" r="2"/>
+          <path d="M10 18h6"/>
+          <path d="M6 16v-6h4l2 4h4v-3h2v7"/>
+          <path d="M11 6h2v4h-2z"/>
+        </svg>
+      </div>
+      <div class="u-txt">
+        <div class="u1">Unlock free delivery</div>
+        <div class="u2">Shop for ₹4 more</div>
+      </div>
+    </div>
+    
+    <!-- Right cart pill with real product photo from Amazon CDN fallback to Unsplash -->
+    <div class="cart-pill">
+      <div class="cp-ic">
+        <img class="prod-thumb" src="https://images.unsplash.com/photo-1628009368231-7bb7cfcb0def?auto=format&fit=crop&q=80&w=100&h=100" alt="Pet Food">
+        <!-- Overlaid cart badge icon -->
+        <svg class="cart-small" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h2l1.5 11h10L20 8H7"/></svg>
+      </div>
+      <div class="c-txt">
+        <div class="c1">Cart</div>
+        <div class="c2">1 item</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bottom Navigation tab bar (Exact Zepto Style with high-fidelity inline SVGs) -->
+  <div class="bottom-nav">
+    <div class="item is-active">
+      <!-- Pink squircle with styled lowercase "z" -->
+      <div class="zbadge">z</div>
+      <div class="cap">Home</div>
+    </div>
+    <div class="item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+      <div class="cap">Categories</div>
+    </div>
+    <div class="item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M10 8.5v7l6-3.5z"/></svg>
+      <div class="cap">Play &amp; Win</div>
+    </div>
+    <div class="item" style="position:relative">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h13a3 3 0 0 1 0 6h-1"/><path d="M4 8v9a2 2 0 0 0 2 2h7a2 2 0 0 0 2-2V8"/><path d="M8 4v2M12 4v2"/></svg>
+      <div class="cap">Cafe</div>
+    </div>
+    <!-- Floating Bingo! promotional badge on Cafe tab -->
+    <div class="bingo-badge">
+      <svg viewBox="0 0 44 44">
+        <circle cx="22" cy="22" r="14" fill="#F8B400" stroke="#fff" stroke-width="1.5" filter="drop-shadow(0 2px 4px rgba(0,0,0,0.12))"/>
+        <text x="22" y="24" fill="#B20A0A" font-size="7" font-weight="900" text-anchor="middle" font-family="sans-serif">Bingo!</text>
+      </svg>
+    </div>
+  </div>
+  <div class="home-indicator"></div>
+
+</div>
+</div>
+</body>
+</html>
