@@ -5,6 +5,7 @@
    Crossfades between them to feel like a pet gently walking —
    calm, premium, not a spinner. Only opacity animates; the scale/
    glow/position differences are already baked into each frame.
+   Only plays once, on the very first navigation (01 -> 02).
    ============================================================ */
 
 .pp-loader {
@@ -25,7 +26,7 @@
   width: 100%; height: 100%;
   object-fit: cover; display: block;
   opacity: 0;
-  animation-duration: 1380ms;
+  animation-duration: 1200ms;
   animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
   animation-iteration-count: infinite;
 }
@@ -33,30 +34,41 @@
 .pp-frame-2 { animation-name: pp-frame2; }
 .pp-frame-3 { animation-name: pp-frame3; }
 
-/* timeline (1380ms total): frame hold 180ms, transition 280ms, x3
-   1 -> hold 0-180ms, fade out 180-460ms
-   2 -> fade in 180-460ms, hold 460-640ms, fade out 640-920ms
-   3 -> fade in 640-920ms, hold 920-1100ms, fade out 1100-1380ms (loops to frame 1) */
+.pp-caption {
+  position: absolute; left: 0; right: 0; bottom: 15%;
+  z-index: 2;
+  text-align: center;
+  font-family: var(--font-ui, "Figtree", sans-serif);
+  font-size: 19px; font-weight: 800;
+  color: var(--purple-deep, #7A14AC);
+  line-height: 1.4;
+  padding: 0 40px;
+}
+
+/* timeline (1200ms total): frame hold 150ms, transition 250ms, x3
+   1 -> hold 0-150ms, fade out 150-400ms
+   2 -> fade in 150-400ms, hold 400-550ms, fade out 550-800ms
+   3 -> fade in 550-800ms, hold 800-950ms, fade out 950-1200ms (loops to frame 1) */
 @keyframes pp-frame1 {
   0%      { opacity: 1; }
-  13.04%  { opacity: 1; }
+  12.5%   { opacity: 1; }
   33.33%  { opacity: 0; }
-  79.71%  { opacity: 0; }
+  79.17%  { opacity: 0; }
   100%    { opacity: 1; }
 }
 @keyframes pp-frame2 {
   0%      { opacity: 0; }
-  13.04%  { opacity: 0; }
+  12.5%   { opacity: 0; }
   33.33%  { opacity: 1; }
-  46.38%  { opacity: 1; }
+  45.83%  { opacity: 1; }
   66.67%  { opacity: 0; }
   100%    { opacity: 0; }
 }
 @keyframes pp-frame3 {
   0%      { opacity: 0; }
-  46.38%  { opacity: 0; }
+  45.83%  { opacity: 0; }
   66.67%  { opacity: 1; }
-  79.71%  { opacity: 1; }
+  79.17%  { opacity: 1; }
   100%    { opacity: 0; }
 }
 
