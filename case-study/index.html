@@ -1587,6 +1587,7 @@
             <button class="structure-item structure-item--sub" type="button" data-phase="screen06">Personalised Pet Care</button>
             <button class="structure-item structure-item--sub" type="button" data-phase="screen07">Reward Entry from Cart</button>
             <button class="structure-item" type="button" data-phase="finalscreens">09 / Final Screens</button>
+            <button class="structure-item" type="button" data-phase="motion">10 / Motion &amp; Interaction</button>
           </nav>
         </div>
       </aside>
@@ -3910,6 +3911,53 @@
                   <div class="phone-shell"><div class="phone-frame"><iframe src="../hifi/07-cart-unclaimed.html" title="07 Reward Entry from Cart"></iframe></div></div>
                 </div>
                 <div class="final-screen-label"><span class="fs-num">07</span> · Reward Entry from Cart</div>
+              </div>
+
+            </div>
+          </div>
+
+        </div>
+
+        <div class="research-panel" data-phase="motion">
+          <div class="rc-eyebrow">10 / Motion &amp; Interaction</div>
+          <h2 class="rc-title">Paw Print Preloader</h2>
+
+          <div class="overview-section">
+            <p class="overview-paragraph">
+              Every navigation inside the flow is bridged by a short, looping paw-print animation instead of a generic spinner. Three prints sit fixed in a diagonal trail; only which one glows changes, cycling bottom → middle → top on a continuous loop — as if a pet is gently walking across the screen while Zepto prepares something for them.
+            </p>
+          </div>
+
+          <div class="overview-section">
+            <div class="diagram-split-layout">
+
+              <!-- Left Column: live looping demo -->
+              <div class="wireframe-container">
+                <div class="phone-shell">
+                  <div class="phone-frame">
+                    <iframe src="../hifi/loader-demo.html" title="Paw print preloader — live loop"></iframe>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Right Column: how it works -->
+              <div>
+                <div style="margin-bottom: 24px;">
+                  <h4 style="font-family: var(--font-display); font-size: 16px; font-weight: 750; color: var(--ink-max); margin-bottom: 8px;">How it works</h4>
+                  <ul class="comparison-list" style="margin-top: 10px; font-size: 12.5px; color: var(--grey-1); gap: 6px;">
+                    <li>Position never changes — only opacity, scale and glow shift between prints.</li>
+                    <li>Each print holds for 180ms, then a 280ms crossfade hands the glow to the next.</li>
+                    <li>A full loop runs ~1.35–1.5s, easing with <code>cubic-bezier(0.4, 0, 0.2, 1)</code> — no bounce, no spring.</li>
+                    <li>Plays as a transition overlay between every screen in the live prototype, then reveals the next page.</li>
+                  </ul>
+                </div>
+
+                <div class="challenge-card" style="background: var(--purple-tint); border-color: var(--purple); padding: 18px;">
+                  <h5 style="font-family: var(--font-display); font-size: 14px; font-weight: 750; color: var(--purple-deep); margin-bottom: 6px;">Why not a spinner?</h5>
+                  <p style="font-size: 12.5px; line-height: 1.45; color: var(--purple-deep); margin: 0;">
+                    A spinner communicates "wait." This animation is meant to feel alive — calm, premium and emotionally warm, reinforcing that a little pet is taking gentle steps while its reward pack comes together, rather than just filling dead time between taps.
+                  </p>
+                </div>
               </div>
 
             </div>

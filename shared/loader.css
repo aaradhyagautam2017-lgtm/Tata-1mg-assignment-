@@ -1,0 +1,66 @@
+/* ============================================================
+   loader.css — "Paw Parade" preloader / page-transition animation
+   3 pre-rendered GPT frames (hifi/assets/animation 1/2/3.png), each
+   a full device-screen composition with a different paw active.
+   Crossfades between them to feel like a pet gently walking —
+   calm, premium, not a spinner. Only opacity animates; the scale/
+   glow/position differences are already baked into each frame.
+   ============================================================ */
+
+.pp-loader {
+  position: absolute; inset: 0; z-index: 999;
+  opacity: 0; visibility: hidden;
+  pointer-events: none;
+  transition: opacity 220ms ease;
+  background: #FBF3EC;
+  overflow: hidden;
+  border-radius: inherit;
+}
+.pp-loader.is-active {
+  opacity: 1; visibility: visible;
+}
+
+.pp-frame {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+  object-fit: cover; display: block;
+  opacity: 0;
+  animation-duration: 1380ms;
+  animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  animation-iteration-count: infinite;
+}
+.pp-frame-1 { animation-name: pp-frame1; }
+.pp-frame-2 { animation-name: pp-frame2; }
+.pp-frame-3 { animation-name: pp-frame3; }
+
+/* timeline (1380ms total): frame hold 180ms, transition 280ms, x3
+   1 -> hold 0-180ms, fade out 180-460ms
+   2 -> fade in 180-460ms, hold 460-640ms, fade out 640-920ms
+   3 -> fade in 640-920ms, hold 920-1100ms, fade out 1100-1380ms (loops to frame 1) */
+@keyframes pp-frame1 {
+  0%      { opacity: 1; }
+  13.04%  { opacity: 1; }
+  33.33%  { opacity: 0; }
+  79.71%  { opacity: 0; }
+  100%    { opacity: 1; }
+}
+@keyframes pp-frame2 {
+  0%      { opacity: 0; }
+  13.04%  { opacity: 0; }
+  33.33%  { opacity: 1; }
+  46.38%  { opacity: 1; }
+  66.67%  { opacity: 0; }
+  100%    { opacity: 0; }
+}
+@keyframes pp-frame3 {
+  0%      { opacity: 0; }
+  46.38%  { opacity: 0; }
+  66.67%  { opacity: 1; }
+  79.71%  { opacity: 1; }
+  100%    { opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pp-frame { animation: none; opacity: 0; }
+  .pp-frame-1 { opacity: 1; }
+}
