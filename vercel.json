@@ -1,5 +1,6 @@
 {
-  "rewrites": [
-    { "source": "/", "destination": "/case-study/index.html" }
+  "routes": [
+    { "src": "^/$", "dest": "/case-study/index.html" },
+    { "handle": "filesystem" }
   ]
 }
