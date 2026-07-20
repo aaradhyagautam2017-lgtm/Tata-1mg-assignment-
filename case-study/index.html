@@ -11,6 +11,7 @@
     height: 100%;
   }
   body { padding-bottom: 96px; }
+  body[data-view="prototype"] { padding-bottom: 0; }
 
   /* ---------- header (shared chrome across both views) ---------- */
   .cs-header {
@@ -710,13 +711,14 @@
   /* app-like, full-screen: no page chrome, phone fits the first fold, no scroll.
      Sizing is fully JS-driven (see fitPrototypePhone) so it always matches the
      actual viewport rather than fighting a guessed CSS height. */
-  body[data-view="prototype"] .cs-header { display: none; }
+  body[data-view="prototype"] .cs-header,
+  body[data-view="prototype"] .cs-footer { display: none; }
   .proto-view-inner { max-width: 960px; margin: 0 auto; padding: 20px 24px; }
   .proto-wrap {
     display: flex; flex-direction: column; align-items: center; gap: 16px;
   }
   .phone-scale-wrap {
-    display: flex; justify-content: center;
+    display: flex; justify-content: center; align-items: flex-start;
   }
   #proto-phone-shell { transform-origin: top center; }
   .proto-controls {
